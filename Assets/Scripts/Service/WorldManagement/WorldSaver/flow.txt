@@ -1,0 +1,10 @@
+SaveWorld()
+├── Save world.meta
+├── For each loaded chunk
+│    └── SaveChunk(chunk)
+
+LoadWorld()
+├── Load world.meta
+├── Set seed
+├── Set player position
+└── Start chunk streaming

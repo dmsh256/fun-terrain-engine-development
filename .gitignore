@@ -1,0 +1,13 @@
+.idea
+/Library
+/Logs
+/obj
+/ProfilerCaptures
+/Temp
+/UserSettings
+/Assets/Scenes/*
+Assembly-CSharp.csproj
+Assembly-CSharp-Editor.csproj
+Assembly-CSharp-firstpass.csproj
+Stolen Sun (v1).sln
+Stolen Sun (v1).sln.DotSettings.user

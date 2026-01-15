@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5568a5532e2f419381ee8a8c904bf75b, type: 3}
+  m_Name: Meadow
+  m_EditorClassIdentifier: Assembly-CSharp::Settings.Biome.Biome
+  biomeName: Meadow
+  minTemperature: 0.047
+  maxTemperature: 0.399
+  minMoisture: 0
+  maxMoisture: 0
+  heightNoise: {fileID: 0}
+  heightCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: -0.35233858
+      outSlope: -0.35233858
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.097680524
+      value: 0.9655834
+      inSlope: -0.13286638
+      outSlope: -0.13286638
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.35273615
+      value: 0.9876727
+      inSlope: -0.03513918
+      outSlope: -0.03513918
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.5383418
+      value: 0.9585541
+      inSlope: 0.06748012
+      outSlope: 0.06748012
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.75757325
+      value: 1.0225356
+      inSlope: 0.05088515
+      outSlope: 0.05088515
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 0.92549056
+      value: 0.9906188
+      inSlope: -0.032084137
+      outSlope: -0.032084137
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0.12590586
+      outSlope: 0.12590586
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  heightMultiplier: 30
+  debugColor: {r: 0.07715275, g: 0.52201253, b: 0.13855699, a: 0}
