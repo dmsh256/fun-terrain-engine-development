@@ -5,3 +5,5 @@ Added noise generators, masks engine, object placer, preview of N chunks.
 A little messy, not optimal because in progress.
 
 Upcoming: biomes, cliffs, rivers.
+
+![terrain.png](terrain.png)
