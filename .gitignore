@@ -6,6 +6,7 @@
 /Temp
 /UserSettings
 /Assets/Scenes/*
+/Assets/*.meta
 Assembly-CSharp.csproj
 Assembly-CSharp-Editor.csproj
 Assembly-CSharp-firstpass.csproj
