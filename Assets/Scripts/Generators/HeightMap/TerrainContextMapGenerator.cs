@@ -1,0 +1,36 @@
+using System.Collections.Generic;
+using Generators.BiomeMap;
+using Settings;
+using Settings.Biome;
+using UnityEngine;
+using WorldGeneration.Biomes;
+
+namespace Generators.HeightMap
+{
+    /**
+     * Sampling chain: structural height map -> biomes (because they are height dependent)-> biome shaping -> terrain modifiers -> erosion (in the future)
+     *
+     * Introduce interfaces if you want to make structuralHeightMapGenerator & heightMapProcessor interchangeable
+     */
+    public class TerrainContextMapGenerator
+    {
+        private readonly IBiomeMapGenerator biomeGenerator;
+        private readonly StructuralHeightMapGenerator structuralHeightMapGenerator = new();
+        private readonly HeightMapProcessor heightMapProcessor = new();
+        
+        public TerrainContextMapGenerator(WorldSettings worldSettings)
+        {
+            biomeGenerator = BiomeGeneratorFactory.GetBiomeMapGenerator(worldSettings);
+        }
+        
+        public TerrainContextMap GenerateTerrainContextMap(int width, int length, GlobalHeightMapSettings settings, Vector2 sampleCentre, BiomeData[] biomes, List<IHeightMapModifier> heightModifiers = null)
+        {
+            float[,] structuralHeight = structuralHeightMapGenerator.GenerateStructuralHeightMap(width, length, settings, sampleCentre);
+
+            BiomeDensityMap biomeDensityMap =
+                biomeGenerator.GenerateBiomeMap(width, length, biomes, structuralHeight, sampleCentre);
+            
+            return heightMapProcessor.ProcessHeight(structuralHeight, settings, sampleCentre, biomeDensityMap, biomes);
+        }
+    }
+}

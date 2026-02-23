@@ -1,0 +1,73 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9365c9026e14cd2a661b98ed1f39f08, type: 3}
+  m_Name: Light forest
+  m_EditorClassIdentifier: Assembly-CSharp::WorldGeneration.Biomes.BiomeData
+  biomeName: Forest
+  debugColor: {r: 0, g: 0.6415094, b: 0.06842761, a: 0}
+  globalWeight: 0.8
+  minHeight: 0.03
+  maxHeight: 0.6
+  terrainShaper: {fileID: 11400000, guid: 8e479c8091878df43a01456a9259ac72, type: 2}
+  soilTexture: {fileID: 2800000, guid: 60313a5c597180846aa0722c63c64101, type: 3}
+  grassTexture: {fileID: 2800000, guid: 07d39223b06b25f449d2a5320a1e8a05, type: 3}
+  rockTexture: {fileID: 2800000, guid: f736fa6fbd1feef47aeb662d5de58056, type: 3}
+  hasTrees: 1
+  trees:
+  - prefab: {fileID: 919132149155446097, guid: 21ff29f726d1a224bbd7c00f473fc027, type: 3}
+    density: 0.352
+    yOffset: -0.5
+    scaleMin: 0.5
+    scaleMax: 1
+  - prefab: {fileID: 5513343965389706883, guid: f4cfecebe5a1f9143a527b69d1c7db45,
+      type: 3}
+    density: 0.352
+    yOffset: -0.5
+    scaleMin: 0.5
+    scaleMax: 1
+  hasRocks: 1
+  rocks:
+  - prefab: {fileID: 6819962056721478856, guid: 6b03fd5ce97ca2449b3b9a92cfce1ec5,
+      type: 3}
+    density: 0.302
+    yOffset: -0.72
+    scaleMin: 1
+    scaleMax: 1
+  - prefab: {fileID: 2586713759252572031, guid: 87123ac33e4f0f04bacc28c3d2dcb0f6,
+      type: 3}
+    density: 0.234
+    yOffset: -0.21
+    scaleMin: 1
+    scaleMax: 1
+  - prefab: {fileID: 919132149155446097, guid: 65145b0f27d28da4fa78eeab259a2fff, type: 3}
+    density: 0.319
+    yOffset: -0.6
+    scaleMin: 0.5
+    scaleMax: 1
+  hasGrass: 1
+  grassDensity: 0
+  grassVariants:
+  - mesh: {fileID: -1507585806025751008, guid: a8a66a89963935b4e966c8e617de4cb3, type: 3}
+    material: {fileID: 2100000, guid: 93177626868af8d4d971ee01e99f329f, type: 2}
+    weight: 100
+    scale: 1
+    yOffset: 0
+  - mesh: {fileID: 4579454407841743219, guid: 4980dba1a93966444a70a0cd85d202ab, type: 3}
+    material: {fileID: 2100000, guid: e2fa582d73b240e46bc2e74a9fcf5643, type: 2}
+    weight: 20
+    scale: 1
+    yOffset: -0.1
+  - mesh: {fileID: -8302102485596996044, guid: a4ca1b73d9c584846bba71adeb330c7c, type: 3}
+    material: {fileID: 2100000, guid: f7fb888d8e5d900438f8a64a41f97ca6, type: 2}
+    weight: 50
+    scale: 1
+    yOffset: -0.1

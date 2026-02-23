@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86ef52e5de3f47de9c31d4e41cc3e81f, type: 3}
+  m_Name: CustomRidgedPerlin
+  m_EditorClassIdentifier: Assembly-CSharp::Generators.Noise.NoiseSettings
+  type: 5
+  scale: 4096
+  octaves: 6
+  noiseFrequency: 2
+  noiseAmplitude: 0.6
+  offset: {x: 0, y: 0}
+  octaveSettings:
+  - {fileID: 11400000, guid: dad56202c07b879478e77f0c30399d09, type: 2}
+  - {fileID: 11400000, guid: 6d011b88d88aec844aa3fd7095f5fa45, type: 2}
+  - {fileID: 11400000, guid: d220c7c51c7a1da49bb7c2dd2847dbe3, type: 2}
+  - {fileID: 11400000, guid: 8e58434096907894a899ae2a396f2fdb, type: 2}
+  - {fileID: 11400000, guid: 6cabc7d13b91a084fabac769ac4b8b1a, type: 2}

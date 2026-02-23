@@ -1,0 +1,409 @@
+﻿using System;
+using System.Collections.Generic;
+using Generators;
+using Generators.HeightMap;
+using Generators.MeshGenerator;
+using Generators.Terrain;
+using Settings;
+using UnityEngine;
+using WorldGeneration.Biomes;
+using WorldGeneration.Borders;
+
+public class TerrainChunk
+{
+    public event Action<TerrainChunk, bool> onVisibilityChanged;
+    public event Action<TerrainChunk> onCollisionMeshReady;
+    
+    public Vector2Int coordinates;
+
+    private readonly GameObject meshObject;
+    private readonly Vector2 sampleStartCoordinates;
+    private readonly Bounds bounds;
+
+    private readonly MeshFilter meshFilter;
+    private readonly MeshCollider meshCollider;
+
+    private readonly LODInfo[] detailLevels;
+    private readonly LODMesh[] lodMeshes;
+    private readonly int colliderLODIndex;
+
+    public TerrainContextMap terrainContextMap;
+    private bool heightMapReceived;
+    private int previousLODIndex = -1;
+    private bool hasSetCollider;
+    private bool collisionMeshRequested;
+    private bool forceCollisionMesh;
+    private readonly float maxViewDistance;
+
+    private readonly GlobalHeightMapSettings heightMapSettings;
+    private readonly MeshSettings meshSettings;
+    private readonly Transform viewer;
+    
+    private bool biomeMapReceived;
+    
+    private Vector2 viewerPosition => new(viewer.position.x, viewer.position.z);
+    private readonly List<GameObject> borderObjects = new();
+    private readonly WorldSettings worldSettings;
+    private readonly Transform parent;
+    public readonly LayerMask terrainLayerMask;
+
+    private GameObject waterObject;
+    private readonly List<IHeightMapModifier> worldHeightModifiers = new();
+    private readonly Vector2 chunkWorldPosition;
+    
+    public TerrainChunk(Vector2Int coordinates, WorldSettings worldSettings, GlobalHeightMapSettings heightMapSettings, MeshSettings meshSettings,
+        LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, LayerMask terrainLayerMask)
+    {
+        this.coordinates = coordinates;
+        this.detailLevels = detailLevels;
+        this.colliderLODIndex = colliderLODIndex;
+        this.heightMapSettings = heightMapSettings;
+        this.meshSettings = meshSettings;
+        this.viewer = viewer;
+        this.worldSettings = worldSettings;
+        this.parent = parent;
+        this.terrainLayerMask = terrainLayerMask;
+        
+        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * meshSettings.meshWorldSize;
+        
+        chunkWorldPosition = coordinates * meshSettings.meshWorldSize;
+        Vector3 chunkCenter = new (
+            chunkWorldPosition.x + meshSettings.meshWorldSize * 0.5f,
+            0f,
+            chunkWorldPosition.y + meshSettings.meshWorldSize * 0.5f
+        );
+        bounds = new Bounds(chunkCenter, new Vector3(meshSettings.meshWorldSize, 0f, meshSettings.meshWorldSize));
+        
+        meshObject = new GameObject("Terrain Chunk " + coordinates);
+        meshObject.layer = Mathf.RoundToInt(Mathf.Log(this.terrainLayerMask.value, 2));
+        MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
+        meshFilter = meshObject.AddComponent<MeshFilter>();
+        meshCollider = meshObject.AddComponent<MeshCollider>();
+        meshRenderer.material = material;
+
+        meshObject.transform.position = new Vector3(chunkWorldPosition.x, 0f, chunkWorldPosition.y);
+        meshObject.transform.parent = parent;
+        SetVisible(false);
+
+        CreateWater(worldSettings.waterMaterial); // TODO do not create when min height > water height 
+        
+        lodMeshes = new LODMesh[detailLevels.Length];
+        for (int i = 0; i < detailLevels.Length; i++)
+        {
+            lodMeshes[i] = new LODMesh(detailLevels[i].lod);
+            lodMeshes[i].UpdateCallback += UpdateTerrainChunk;
+        }
+
+        maxViewDistance = detailLevels[^1].visibleDstThreshold;
+    }
+
+    public void SetHeightModifier(IHeightMapModifier modifier)
+    {
+        worldHeightModifiers.Add(modifier);
+    }
+    
+    public void Load()
+    {
+        List<IHeightMapModifier> effectiveModifiers = new();
+        foreach (IHeightMapModifier modifier in worldHeightModifiers)
+        {
+            if (modifier.bounds.Intersects(bounds))
+                effectiveModifiers.Add(modifier);
+        }
+        
+        ThreadedDataRequester.RequestData(
+            () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine,
+                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnHeightMapReceived);
+    }
+
+    private void OnHeightMapReceived(object heightMapObject)
+    {
+        terrainContextMap = (TerrainContextMap)heightMapObject;
+        heightMapReceived = true;
+        biomeMapReceived = true;
+        
+        UpdateTerrainChunk();
+        TryUpdateCollisionMesh();
+        
+        //CreateBorders(worldSettings.borderMaterial);
+    }
+    
+    public void UpdateTerrainChunk()
+    {
+        if (!heightMapReceived) 
+            return;
+        
+        if (!biomeMapReceived) 
+            return;
+
+        float viewerDstFromNearestEdge = Mathf.Sqrt(
+            bounds.SqrDistance(new Vector3(viewerPosition.x, 0f, viewerPosition.y))
+        );
+
+        bool wasVisible = IsVisible();
+        bool visible = viewerDstFromNearestEdge <= maxViewDistance;
+
+        if (visible)
+        {
+            int lodIndex = 0;
+            for (int i = 0; i < detailLevels.Length - 1; i++)
+            {
+                if (viewerDstFromNearestEdge > detailLevels[i].visibleDstThreshold)
+                    lodIndex = i + 1;
+                else
+                    break;
+            }
+
+            if (lodIndex != previousLODIndex)
+            {
+                LODMesh lodMesh = lodMeshes[lodIndex];
+                if (lodMesh.hasTerrainMesh)
+                {
+                    previousLODIndex = lodIndex;
+                    meshFilter.mesh = lodMesh.colliderMesh;
+                    meshCollider.sharedMesh = lodMesh.colliderMesh;
+                }
+                else if (!lodMesh.hasRequestedTerrainMesh)
+                {
+                    lodMesh.RequestMesh(terrainContextMap.heightMap, terrainContextMap.biomeDensityMap.primary, meshSettings);
+                }
+            }
+        }
+
+        if (wasVisible == visible) 
+            return;
+        
+        SetVisible(visible);
+        
+        if (waterObject)
+            waterObject.SetActive(visible);
+        
+        onVisibilityChanged?.Invoke(this, visible);
+    }
+
+    public void DebugDrawWeights(Action<Vector3, Vector3, Color> drawLine)
+    {
+        BiomeDensityMap biomeMap = terrainContextMap.biomeDensityMap;
+        
+        if (biomeMap.dominance == null) 
+            return;
+
+        int step = 2;
+        for (int y = 0; y < biomeMap.height; y += step)
+        {
+            for (int x = 0; x < biomeMap.width; x += step)
+            {
+                float worldX = chunkWorldPosition.x + x;
+                float worldZ = chunkWorldPosition.y + y;
+                float worldY = terrainContextMap.heightMap.values[x, y];
+
+                Vector3 start = new (worldX, worldY, worldZ);
+                int primary = biomeMap.primary[x, y];
+                if (primary < 0)
+                    continue;
+
+                float dominance = biomeMap.dominance[x, y];
+                float lineScale = 50f;
+                Vector3 end = start + Vector3.up * dominance * lineScale;
+
+                Color c = new (255, 255, 255);
+                drawLine(start, end, c);
+            }
+        }
+    }
+    
+    public void RequestCollisionMesh(bool force)
+    {
+        collisionMeshRequested = true;
+        if (force)
+            forceCollisionMesh = true;
+
+        TryUpdateCollisionMesh();
+    }
+
+    private void TryUpdateCollisionMesh()
+    {
+        if (hasSetCollider)
+            return;
+
+        if (!collisionMeshRequested)
+            return;
+
+        if (!heightMapReceived)
+            return;
+
+        float sqrDstFromViewerToEdge = bounds.SqrDistance(new Vector3(viewerPosition.x, 0f, viewerPosition.y));
+
+        if (!forceCollisionMesh && sqrDstFromViewerToEdge > detailLevels[colliderLODIndex].sqrVisibleDstThreshold)
+            return;
+
+        LODMesh colliderLod = lodMeshes[colliderLODIndex];
+        if (!colliderLod.hasRequestedColliderMesh)
+        {
+            colliderLod.RequestColliderMesh(terrainContextMap.heightMap, meshSettings);
+        }
+
+        if (!colliderLod.hasColliderMesh)
+            return;
+
+        meshCollider.sharedMesh = colliderLod.colliderMesh;
+        hasSetCollider = true;
+
+        onCollisionMeshReady?.Invoke(this);
+    }
+
+    private void SetVisible(bool visible)
+    {
+        meshObject.SetActive(visible);
+    }
+
+    private bool IsVisible()
+    {
+        return meshObject.activeSelf;
+    }
+    
+    private IEnumerable<WorldBorderSide> GetBorderSides()
+    {
+        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.left))
+            yield return WorldBorderSide.Left;
+
+        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.right))
+            yield return WorldBorderSide.Right;
+
+        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.up))
+            yield return WorldBorderSide.Top;
+
+        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.down))
+            yield return WorldBorderSide.Bottom;
+    }
+    
+    private bool IsChunkCoordInsideWorld(Vector2 chunkCoordinates)
+    {
+        int halfX = worldSettings.worldSizeInChunksX / 2;
+        int halfY = worldSettings.worldSizeInChunksY / 2;
+
+        return chunkCoordinates.x >= -halfX && chunkCoordinates.x < halfX && chunkCoordinates.y >= -halfY && chunkCoordinates.y < halfY;
+    }
+
+    private void CreateWater(Material material)
+    {
+        if (terrainContextMap.heightMap.minValue * terrainContextMap.heightMap.heightMultiplier > worldSettings.waterLevel)
+            return;
+        
+        waterObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
+        waterObject.name = $"Water {coordinates}";
+        waterObject.transform.SetParent(meshObject.transform, false);
+
+        float scale = meshSettings.meshWorldSize / 10f;
+        waterObject.transform.localScale = new Vector3(scale, 1f, scale);
+
+        waterObject.transform.localPosition = new Vector3(
+            meshSettings.meshWorldSize * 0.5f,
+            worldSettings.waterLevel,
+            meshSettings.meshWorldSize * 0.5f
+        );
+
+        MeshRenderer renderer = waterObject.GetComponent<MeshRenderer>();
+        renderer.material = material;
+
+        if (renderer.material.HasProperty("_WaterHeight"))
+            renderer.material.SetFloat("_WaterHeight", worldSettings.waterLevel);
+
+        GameObject.Destroy(waterObject.GetComponent<Collider>());
+    }
+    
+    private void CreateBorders(Material borderMaterial) // TODO fix this method (chunk center is now a real center, not bottom left)
+    {
+        foreach (WorldBorderSide side in GetBorderSides())
+        {
+            GameObject border = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            border.name = $"WorldBorder_{side}";
+            border.transform.SetParent(parent, false);
+
+            border.GetComponent<MeshRenderer>().material = borderMaterial;
+            
+            Vector3 position = chunkWorldPosition;
+            Quaternion rotation = Quaternion.identity;
+
+            float half = meshSettings.meshWorldSize * 0.5f;
+            const float outwardOffset = 0.05f;
+            float height = terrainContextMap.heightMap.minValue * terrainContextMap.heightMap.heightMultiplier;
+
+            switch (side)
+            {
+                case WorldBorderSide.Right:
+                    position += new Vector3(meshSettings.meshWorldSize + outwardOffset, height, half);
+                    rotation = Quaternion.Euler(0, 90, 0);
+                    break;
+
+                case WorldBorderSide.Left:
+                    position += new Vector3(-outwardOffset, height, half);
+                    rotation = Quaternion.Euler(0, -90, 0);
+                    break;
+
+                case WorldBorderSide.Top:
+                    position += new Vector3(half, height, meshSettings.meshWorldSize + outwardOffset);
+                    rotation = Quaternion.identity;
+                    break;
+
+                case WorldBorderSide.Bottom:
+                    position += new Vector3(half, height, -outwardOffset);
+                    rotation = Quaternion.Euler(0, 180, 0);
+                    break;
+            }
+
+            border.transform.position = position;
+            border.transform.rotation = rotation;
+            border.transform.localScale = new Vector3(meshSettings.meshWorldSize, terrainContextMap.heightMap.maxValue * terrainContextMap.heightMap.heightMultiplier, 2);
+
+            borderObjects.Add(border);
+        }
+    }
+}
+
+internal class LODMesh
+{
+    public Mesh colliderMesh;
+    
+    public bool hasRequestedTerrainMesh;
+    public bool hasTerrainMesh;
+
+    public bool hasRequestedColliderMesh;
+    public bool hasColliderMesh;
+    
+    private readonly int levelOfDetail;
+    public event Action UpdateCallback;
+
+    public LODMesh(int levelOfDetail)
+    {
+        this.levelOfDetail = levelOfDetail;
+    }
+
+    private void OnMeshDataReceived(object meshDataObject)
+    {
+        colliderMesh = ((MeshData)meshDataObject).CreateMesh();
+        hasTerrainMesh = true;
+
+        UpdateCallback?.Invoke();
+    }
+    
+    private void OnColliderMeshDataReceived(object meshDataObject)
+    {
+        colliderMesh = ((ColliderMeshData)meshDataObject).CreateColliderMesh();
+        hasColliderMesh = true;
+    }
+
+    public void RequestMesh(HeightMap heightMap, int[,] biomeDensityMap, MeshSettings meshSettings)
+    {
+        hasRequestedTerrainMesh = true;
+        ThreadedDataRequester.RequestData(() => MeshGenerator.GenerateTerrainMesh(heightMap.values, biomeDensityMap, meshSettings, levelOfDetail),
+            OnMeshDataReceived);
+    }
+    
+    public void RequestColliderMesh(HeightMap heightMap, MeshSettings meshSettings)
+    {
+        hasRequestedColliderMesh = true;
+        ThreadedDataRequester.RequestData(() => ColliderMeshGenerator.GenerateColliderMesh(heightMap.values, meshSettings, levelOfDetail),
+            OnColliderMeshDataReceived);
+    }
+}

@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9365c9026e14cd2a661b98ed1f39f08, type: 3}
+  m_Name: Swamp
+  m_EditorClassIdentifier: Assembly-CSharp::WorldGeneration.Biomes.BiomeData
+  biomeName: Swamp
+  debugColor: {r: 0.38993704, g: 0.17320313, b: 0.018393207, a: 1}
+  globalWeight: 1
+  minHeight: 0.02
+  maxHeight: 0.03
+  terrainShaper: {fileID: 11400000, guid: 7eaa5414a0fd18c41898d15e3c586463, type: 2}
+  soilTexture: {fileID: 2800000, guid: f11fa97fd9970a548a67d4216dc42b9d, type: 3}
+  grassTexture: {fileID: 2800000, guid: f11fa97fd9970a548a67d4216dc42b9d, type: 3}
+  rockTexture: {fileID: 2800000, guid: f736fa6fbd1feef47aeb662d5de58056, type: 3}
+  hasTrees: 1
+  trees:
+  - prefab: {fileID: 919132149155446097, guid: b5feab0a6edb21c408a77d0c521a08c8, type: 3}
+    density: 0.22
+    yOffset: -0.5
+    scaleMin: 1.3
+    scaleMax: 2.2
+  - prefab: {fileID: 5705387627814833468, guid: 3fb85eac741a7f74ba8567ee0932efd2,
+      type: 3}
+    density: 0.22
+    yOffset: 0.1
+    scaleMin: 1
+    scaleMax: 1.5
+  hasRocks: 0
+  rocks: []
+  hasGrass: 0
+  grassDensity: 0
+  grassVariants: []

@@ -1,0 +1,84 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9365c9026e14cd2a661b98ed1f39f08, type: 3}
+  m_Name: Forest
+  m_EditorClassIdentifier: Assembly-CSharp::WorldGeneration.Biomes.BiomeData
+  biomeName: Forest
+  debugColor: {r: 0, g: 0.29559743, b: 0.030231562, a: 0}
+  globalWeight: 0.8
+  minHeight: 0.2
+  maxHeight: 0.6
+  terrainShaper: {fileID: 11400000, guid: 8e479c8091878df43a01456a9259ac72, type: 2}
+  soilTexture: {fileID: 2800000, guid: f11fa97fd9970a548a67d4216dc42b9d, type: 3}
+  grassTexture: {fileID: 2800000, guid: 037d42644b517d84fae002bfe2cb15e4, type: 3}
+  rockTexture: {fileID: 2800000, guid: f736fa6fbd1feef47aeb662d5de58056, type: 3}
+  hasTrees: 1
+  trees:
+  - prefab: {fileID: 2656618318678544221, guid: 28a975aa8310cae41add1e09a208bd6e,
+      type: 3}
+    density: 0.95
+    yOffset: -0.55
+    scaleMin: 5
+    scaleMax: 11.4
+  - prefab: {fileID: 919132149155446097, guid: 889401e31df5bc64391f2f082952515b, type: 3}
+    density: 0.917
+    yOffset: -0.55
+    scaleMin: 1
+    scaleMax: 12.2
+  hasRocks: 1
+  rocks:
+  - prefab: {fileID: 5389395240314065769, guid: 967b6a4dedfb5424f8c3a056595dab0e,
+      type: 3}
+    density: 0.109
+    yOffset: -2.64
+    scaleMin: 1
+    scaleMax: 7.8
+  - prefab: {fileID: 2586713759252572031, guid: 87123ac33e4f0f04bacc28c3d2dcb0f6,
+      type: 3}
+    density: 0.268
+    yOffset: -0.81
+    scaleMin: 1
+    scaleMax: 2.3
+  - prefab: {fileID: 3767358828197824249, guid: 7df3af01473dd7841ae339df250b9cd8,
+      type: 3}
+    density: 0.243
+    yOffset: -0.72
+    scaleMin: 1
+    scaleMax: 1.4
+  - prefab: {fileID: 919132149155446097, guid: df6d7035f53ca6142b8a2896ce56d919, type: 3}
+    density: 0.243
+    yOffset: -0.72
+    scaleMin: 1
+    scaleMax: 1.4
+  - prefab: {fileID: 919132149155446097, guid: 4eb57a7a08981674195b9c11d340ead3, type: 3}
+    density: 0.154
+    yOffset: -0.72
+    scaleMin: 1
+    scaleMax: 1.4
+  hasGrass: 1
+  grassDensity: 0.3
+  grassVariants:
+  - mesh: {fileID: 6697108462537596329, guid: e35f133bb844bf04a83dcc159d0c53a1, type: 3}
+    material: {fileID: 2100000, guid: c27d789069d15f04db69eb072d9c37b2, type: 2}
+    weight: 50
+    scale: 1
+    yOffset: 0
+  - mesh: {fileID: -1507585806025751008, guid: a8a66a89963935b4e966c8e617de4cb3, type: 3}
+    material: {fileID: 2100000, guid: 4b043753b6e14de40b5307322dceb86f, type: 2}
+    weight: 50
+    scale: 1
+    yOffset: 0
+  - mesh: {fileID: -8302102485596996044, guid: a4ca1b73d9c584846bba71adeb330c7c, type: 3}
+    material: {fileID: 2100000, guid: 4b043753b6e14de40b5307322dceb86f, type: 2}
+    weight: 50
+    scale: 1
+    yOffset: 0
