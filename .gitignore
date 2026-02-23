@@ -16,3 +16,5 @@ Assembly-CSharp-firstpass.csproj
 Stolen Sun (v1).sln
 Stolen Sun (v1).sln.DotSettings.user
 /Builds/*
+
+!/Assets/Scenes/Demo Scene.unity
