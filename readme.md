@@ -81,3 +81,7 @@ System supports:
 - Density control
 - Chunk ownership tracking
 - Controlled despawning
+
+## Known bugs:
+- Grass is not loading sometimes
+- A couple of micro freezes when loading a new terrain chunk

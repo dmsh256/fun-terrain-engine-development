@@ -27,4 +27,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: ab6001745596bc04bbdf19b1a8d2ad94, type: 2}
   - {fileID: 11400000, guid: 24620d6929506ca41b72ace59cb8ba71, type: 2}
   biomeBlending: 0
-  waterLevel: 3
+  waterLevel: 6
