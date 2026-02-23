@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: World border mat
+  m_Name: World border material
   m_Shader: {fileID: 4800000, guid: 63eb851596af49a280ffdbe339802dde, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0

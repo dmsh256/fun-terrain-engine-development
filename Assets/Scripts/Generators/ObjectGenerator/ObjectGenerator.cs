@@ -25,16 +25,17 @@ namespace Generators.ObjectGenerator
         
         [SerializeField]
         private GrassIndirectRenderer grassRenderer;
-        public Mesh grassMesh;
-        public Material grassMaterial;
-        
         private Vector2Int currentChunkCoordinates;
         
         [SerializeField] 
         private int maxChunkSpawnsPerFrame = 1;
-        
         [SerializeField] 
         private int maxObjectsPerFrame = 10;
+        
+        [Header("Fallback only, optional")]
+        [SerializeField]
+        public Mesh grassMesh;
+        public Material grassMaterial;
         
         public void Init(MeshSettings meshSettings)
         {
