@@ -185,7 +185,7 @@ public class TerrainChunk
     {
         BiomeDensityMap biomeMap = terrainContextMap.biomeDensityMap;
         
-        if (biomeMap.dominance == null) 
+        if (biomeMap.borderDistance == null) 
             return;
 
         int step = 2;
@@ -202,12 +202,11 @@ public class TerrainChunk
                 if (primary < 0)
                     continue;
 
-                float dominance = biomeMap.dominance[x, y];
-                float lineScale = 50f;
-                Vector3 end = start + Vector3.up * dominance * lineScale;
+                float borderDistance = biomeMap.borderDistance[x, y];
+                float lineScale = 0.9f;
+                Vector3 end = start + Vector3.up * borderDistance * lineScale;
 
-                Color c = new (255, 255, 255);
-                drawLine(start, end, c);
+                drawLine(start, end, new Color(255, 255, 255));
             }
         }
     }

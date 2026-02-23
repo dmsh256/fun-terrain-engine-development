@@ -88,7 +88,7 @@ namespace Generators.HeightMap
                 biomes = biomes,
                 primaryBiome = primary,
                 secondaryBiome = biomeMap.secondary[x, y],
-                dominance = biomeMap.dominance[x, y]
+                borderDistance = biomeMap.borderDistance[x, y]
             };
 
             BiomeTerrainShaper shaper = biomes[primary].terrainShaper;

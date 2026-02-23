@@ -46,29 +46,6 @@ namespace Generators.Terrain
         
         public void Start()
         {
-            GameObject fpsController = GameObject.Find("RigidBodyFPSController");
-            Camera mainCamera = Camera.main;
-
-            if (fpsController && mainCamera)
-            {
-                Transform head = fpsController.transform.Find("Head");
-
-                if (head)
-                {
-                    mainCamera.transform.SetParent(head);
-                    mainCamera.transform.localPosition = Vector3.zero;
-                    mainCamera.transform.localRotation = Quaternion.identity;
-                }
-                else
-                {
-                    Debug.LogWarning("Head object not found inside RigidBodyFPSController.");
-                }
-            }
-            else
-            {
-                Debug.LogError("FPS Controller or Main Camera not found!");
-            }
-
             Texture2DArray albedoArray =
                 BiomeAlbedoArrayBuilder.Build(worldSettings.biomes);
 

@@ -13,7 +13,7 @@ namespace Generators.Noise
                 NoiseType.Voronoi => new VoronoiNoiseSource(noiseSettings),
                 NoiseType.CustomizablePerlin => new CustomizablePerlinNoiseSource(noiseSettings),
                 NoiseType.CustomizableRidgedPerlin => new CustomizableRidgedPerlinNoiseSource(noiseSettings),
-                NoiseType.Perlin =>  new PerlinNoiseSource(noiseSettings)
+                _ =>  new PerlinNoiseSource(noiseSettings)
             };
         }
     }
