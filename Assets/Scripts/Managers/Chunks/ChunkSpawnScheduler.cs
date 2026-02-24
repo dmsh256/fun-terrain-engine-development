@@ -5,24 +5,24 @@ namespace Managers.Chunks
 {
     public class ChunkSpawnScheduler
     {
-        private readonly Queue<ChunkSpawnContext> spawnQueue = new();
+        private readonly Queue<TerrainChunk> spawnQueue = new();
         private readonly List<ObjectChunk> chunksSpawning = new();
 
         private readonly int maxChunkSpawnsPerFrame;
         private readonly int maxObjectsPerFrame;
 
-        private readonly System.Action<ChunkSpawnContext> spawnAction;
+        private readonly System.Action<TerrainChunk> spawnAction;
 
-        public ChunkSpawnScheduler(int maxChunkSpawnsPerFrame, int maxObjectsPerFrame, System.Action<ChunkSpawnContext> spawnAction)
+        public ChunkSpawnScheduler(int maxChunkSpawnsPerFrame, int maxObjectsPerFrame, System.Action<TerrainChunk> spawnAction)
         {
             this.maxChunkSpawnsPerFrame = maxChunkSpawnsPerFrame;
             this.maxObjectsPerFrame = maxObjectsPerFrame;
             this.spawnAction = spawnAction;
         }
 
-        public void Enqueue(ChunkSpawnContext context)
+        public void Enqueue(TerrainChunk terrainChunk)
         {
-            spawnQueue.Enqueue(context);
+            spawnQueue.Enqueue(terrainChunk);
         }
 
         public void RegisterSpawningChunk(ObjectChunk chunk)
@@ -42,8 +42,8 @@ namespace Managers.Chunks
 
             while (spawnQueue.Count > 0 && processed < maxChunkSpawnsPerFrame)
             {
-                ChunkSpawnContext context = spawnQueue.Dequeue();
-                spawnAction.Invoke(context);
+                TerrainChunk terrainChunk = spawnQueue.Dequeue();
+                spawnAction.Invoke(terrainChunk);
                 processed++;
             }
         }

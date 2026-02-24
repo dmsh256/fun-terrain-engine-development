@@ -29,7 +29,7 @@ namespace Generators.Terrain
         public MeshSettings meshSettings; 
         public GlobalHeightMapSettings heightMapSettings;
         
-        public ObjectGenerator.ObjectGenerator objectGenerator;
+        public ObjectGenerator.ObjectLifecycleController objectLifecycleController;
         
         private Vector2 viewerPosition;
         private Vector2 viewerPositionOld;
@@ -55,7 +55,7 @@ namespace Generators.Terrain
             meshWorldSize = meshSettings.meshWorldSize;
             chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDistance / meshWorldSize);
 
-            objectGenerator?.Init(meshSettings, worldSettings);
+            objectLifecycleController?.Init(meshSettings, worldSettings);
 
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
             viewerPositionOld = viewerPosition;
@@ -87,7 +87,6 @@ namespace Generators.Terrain
             int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / meshWorldSize);
             
             Vector2Int currentChunkCoord = new(currentChunkCoordX, currentChunkCoordY);
-            objectGenerator?.SetCurrentChunkCoordinates(currentChunkCoord);
 
             for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
             {
@@ -109,7 +108,7 @@ namespace Generators.Terrain
             }
 
             UpdateCollisionChunks(currentChunkCoordX, currentChunkCoordY);
-            objectGenerator?.UpdateLoadedChunks(currentChunkCoord);
+            objectLifecycleController?.UpdateLoadedChunks(currentChunkCoord, visibleTerrainChunks);
         }
 
         private void CreateNewTerrainChunk(Vector2Int viewedChunkCoord)
@@ -128,7 +127,7 @@ namespace Generators.Terrain
             else
                 visibleTerrainChunks.Remove(terrainChunk);
             
-            objectGenerator?.OnTerrainChunkVisibilityChanged(terrainChunk, isVisible);
+            objectLifecycleController?.OnTerrainChunkVisibilityChanged(terrainChunk, isVisible);
         }
         
         private bool IsChunkCoordInsideWorld(Vector2 coord)

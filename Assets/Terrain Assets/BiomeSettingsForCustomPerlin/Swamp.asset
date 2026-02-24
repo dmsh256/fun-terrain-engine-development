@@ -16,7 +16,7 @@ MonoBehaviour:
   debugColor: {r: 0.38993704, g: 0.17320313, b: 0.018393207, a: 1}
   globalWeight: 1
   minHeight: 0.02
-  maxHeight: 0.08
+  maxHeight: 0.06
   isWater: 0
   terrainShaper: {fileID: 11400000, guid: 7eaa5414a0fd18c41898d15e3c586463, type: 2}
   soilTexture: {fileID: 2800000, guid: f11fa97fd9970a548a67d4216dc42b9d, type: 3}
@@ -38,10 +38,10 @@ MonoBehaviour:
   hasRocks: 0
   rocks: []
   hasGrass: 1
-  grassDensity: 10
+  grassDensity: 20
   grassVariants:
   - mesh: {fileID: -7845889386210581727, guid: 97b144e985146e0428ac9008c63be54a, type: 3}
     material: {fileID: 2100000, guid: 34f4a8d84eb63e747b43a812f231ce8b, type: 2}
-    weight: 15
-    scale: 1
+    weight: 20
+    scale: 12
     yOffset: 0

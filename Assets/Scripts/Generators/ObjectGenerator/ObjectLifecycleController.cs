@@ -1,0 +1,133 @@
+using System.Collections.Generic;
+using Generators.BiomeMap;
+using Generators.Grass;
+using Managers.Chunks;
+using Managers.Grass;
+using Managers.Objects;
+using Settings;
+using UnityEngine;
+using WorldGeneration.Biomes;
+
+namespace Generators.ObjectGenerator
+{
+    public class ObjectLifecycleController : MonoBehaviour
+    {
+        [SerializeField]
+        private int chunkLoadRadius = 1;
+        
+        private MeshSettings meshSettings;
+        private WorldSettings worldSettings;
+        
+        private ObjectChunkManager objectManager;
+        private GrassChunkManager grassManager;
+        private ChunkSpawnScheduler chunkSpawnScheduler;
+        
+        [SerializeField]
+        private GrassIndirectRenderer grassRenderer;
+        
+        [SerializeField] 
+        private int maxChunkSpawnsPerFrame = 1;
+        [SerializeField] 
+        private int maxObjectsPerFrame = 10;
+        
+        [Header("Fallback only, optional")]
+        [SerializeField]
+        public Mesh grassMesh;
+        public Material grassMaterial;
+        
+        public void Init(MeshSettings meshSettings, WorldSettings worldSettings)
+        {
+            this.meshSettings = meshSettings;
+            this.worldSettings = worldSettings;
+            
+            if (!grassRenderer)
+                grassRenderer = GetComponent<GrassIndirectRenderer>();
+            if (!grassRenderer)
+                grassRenderer = gameObject.AddComponent<GrassIndirectRenderer>();
+            
+            chunkSpawnScheduler = new ChunkSpawnScheduler(maxChunkSpawnsPerFrame, maxObjectsPerFrame, SpawnFromScheduler);
+            objectManager = new ObjectChunkManager(transform, chunkSpawnScheduler);
+            grassManager = new GrassChunkManager(grassRenderer, meshSettings, grassMesh, grassMaterial);
+        }
+        
+        private void Update()
+        {
+            chunkSpawnScheduler?.Update();
+        }
+        
+        public void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool visible)
+        {
+            grassManager.SetVisibility(terrainChunk.coordinates, visible);
+        }
+
+        public void UpdateLoadedChunks(Vector2Int currentChunkCoordinates, List<TerrainChunk> visibleChunks)
+        {
+            List<Vector2> spawnedCoords = new (objectManager.GetSpawnedCoords());
+            foreach (Vector2 coord in spawnedCoords)
+            {
+                Vector2Int chunkCoord = new((int)coord.x, (int)coord.y);
+                if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
+                {
+                    grassManager.Remove(coord);
+                    objectManager.Remove(coord);
+                }
+            }
+
+            foreach (TerrainChunk terrainChunk in visibleChunks)
+            {
+                Vector2 coord = terrainChunk.coordinates;
+                Vector2Int chunkCoord =
+                    new((int)coord.x, (int)coord.y);
+
+                if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
+                    continue;
+
+                if (objectManager.IsSpawned(coord))
+                    continue;
+
+                chunkSpawnScheduler.Enqueue(terrainChunk);
+            }
+        }
+        
+        private bool IsWithinRadius(Vector2Int sampleChunkCoordinates, Vector2Int currentChunksCoordinates)
+        {
+            return Mathf.Abs(sampleChunkCoordinates.x - currentChunksCoordinates.x) <= chunkLoadRadius &&
+                   Mathf.Abs(sampleChunkCoordinates.y - currentChunksCoordinates.y) <= chunkLoadRadius;
+        }
+
+        private void SpawnFromScheduler(TerrainChunk terrainChunk)
+        {
+            Vector2 chunkCoordinates = terrainChunk.coordinates;
+            if (objectManager.IsSpawned(chunkCoordinates))
+                return;
+
+            TerrainSpawnData terrainSpawnData = new(
+                new Vector2Int((int)chunkCoordinates.x, (int)chunkCoordinates.y),
+                meshSettings,
+                terrainChunk.terrainContextMap.heightMap,
+                terrainChunk.terrainLayerMask);
+
+            IBiomeProvider biomeProvider = new LocalBiomeMapProvider(terrainChunk.terrainContextMap.biomeDensityMap,
+                worldSettings.biomes);
+            
+            grassManager.Spawn(terrainChunk, biomeProvider);
+            objectManager.Spawn(terrainChunk, terrainSpawnData, biomeProvider);
+        }
+        
+        private void OnDisable()
+        {
+            CleanupAllChunks();
+        }
+
+        private void OnDestroy()
+        {
+            CleanupAllChunks();
+        }
+
+        private void CleanupAllChunks()
+        {
+            grassManager?.Clear();
+            objectManager?.Clear();
+        }
+    }
+}

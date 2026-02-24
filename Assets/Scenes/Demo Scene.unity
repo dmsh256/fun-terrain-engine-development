@@ -670,7 +670,7 @@ MonoBehaviour:
   terrainMaterial: {fileID: 2100000, guid: b0872f84cf3c7441d893168677410c73, type: 2}
   meshSettings: {fileID: 11400000, guid: 46ff57af49f874fe2bd2a350a99d063c, type: 2}
   heightMapSettings: {fileID: 11400000, guid: 2b50b7ac79389f74ea8bcacf4a73c811, type: 2}
-  objectGenerator: {fileID: 1602467376}
+  objectLifecycleController: {fileID: 1602467376}
   layerMask:
     serializedVersion: 2
     m_Bits: 1
