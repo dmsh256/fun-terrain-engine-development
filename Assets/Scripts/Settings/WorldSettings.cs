@@ -36,7 +36,6 @@ namespace Settings
     
     public enum BiomeBlending {
         HardSeams,
-        PatchBlending,
         BlobBlending,
     }
 }

@@ -6,18 +6,12 @@ namespace Generators.BiomeMap
     {
         public static IBiomeMapGenerator GetBiomeMapGenerator(WorldSettings worldSettings)
         {
-            switch (worldSettings.biomeBlending)
+            return worldSettings.biomeBlending switch
             {
-                case BiomeBlending.HardSeams:
-                    return new BiomeMapByChunkGenerator();
-                case BiomeBlending.PatchBlending:
-                    return new BiomeMapWithPatchesByChunkGenerator();
-                case BiomeBlending.BlobBlending:
-                    return new BiomeMapWithBlobsByChunkGenerator();
-                
-                default:
-                    return new BiomeMapByChunkGenerator();
-            }
+                BiomeBlending.HardSeams => new BiomeMapByChunkGenerator(),
+                BiomeBlending.BlobBlending => new BiomeMapWithBlobsByChunkGenerator(),
+                _ => new BiomeMapByChunkGenerator()
+            };
         }
     }
 }
