@@ -51,7 +51,7 @@ That enables:
 - Smooth blending based on biome weights
 - Biome-aware height shaping
 - Different terrain logic per biome
-- 
+
 ### 4. Deterministic Chunk-Based Generation
 The world:
 - Is chunk-based
@@ -64,7 +64,7 @@ That means:
 - Stable regeneration
 - No floating trees and rocks from coordinate errors
 - Deterministic rivers possible
-- 
+
 ### 5. Object & Vegetation Spawning System
 Implemented:
 - Chunk-based spawn queues
@@ -74,7 +74,7 @@ Implemented:
 - Stable 200 FPS (tested only on static vegetation)
 - Lazy loading
 - No leaks
-- 
+
 ### 6. Biome-Aware Object Placement
 System supports:
 - Biome-based spawning rules
@@ -83,5 +83,4 @@ System supports:
 - Controlled despawning
 
 ## Known bugs:
-- Grass is not loading sometimes
 - A couple of micro freezes when loading a new terrain chunk

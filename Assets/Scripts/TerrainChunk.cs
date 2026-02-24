@@ -253,7 +253,7 @@ public class TerrainChunk
         meshObject.SetActive(visible);
     }
 
-    private bool IsVisible()
+    public bool IsVisible()
     {
         return meshObject.activeSelf;
     }

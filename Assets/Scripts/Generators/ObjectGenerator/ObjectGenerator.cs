@@ -97,7 +97,6 @@ namespace Generators.ObjectGenerator
             if (visible)
             {
                 OnChunkDataReady(terrainChunk);
-                visibleGrassChunkCoords.Add(coord);
                 if (grassChunks.TryGetValue(coord, out GrassChunk visibleGrassChunk))
                 {
                     UpdateGrassChunkVisibility(visibleGrassChunk, true);
@@ -221,7 +220,7 @@ namespace Generators.ObjectGenerator
                 fallbackMesh: grassMesh,
                 fallbackMaterial: grassMaterial);
             grassChunks.Add(terrainChunk.coordinates, grassChunk);
-            if (visibleGrassChunkCoords.Contains(terrainChunk.coordinates))
+            if (terrainChunk.IsVisible())
             {
                 UpdateGrassChunkVisibility(grassChunk, true);
             }
