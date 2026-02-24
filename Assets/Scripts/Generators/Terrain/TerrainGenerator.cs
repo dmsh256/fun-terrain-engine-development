@@ -56,7 +56,7 @@ namespace Generators.Terrain
             meshWorldSize = meshSettings.meshWorldSize;
             chunksVisibleInViewDst = Mathf.RoundToInt(maxViewDistance / meshWorldSize);
 
-            objectGenerator?.Init(meshSettings);
+            objectGenerator?.Init(meshSettings, worldSettings);
 
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
             viewerPositionOld = viewerPosition;
@@ -86,8 +86,8 @@ namespace Generators.Terrain
 
             int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / meshWorldSize);
             int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / meshWorldSize);
+            
             Vector2Int currentChunkCoord = new(currentChunkCoordX, currentChunkCoordY);
-
             objectGenerator?.SetCurrentChunkCoordinates(currentChunkCoord);
 
             for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
@@ -103,18 +103,9 @@ namespace Generators.Terrain
                         continue;
 
                     if (terrainChunkDictionary.TryGetValue(viewedChunkCoord, out TerrainChunk existingChunk))
-                    {
                         existingChunk.UpdateTerrainChunk();
-                    }
                     else
-                    {
-                        TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
-
-                        terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
-                        newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
-                        newChunk.onCollisionMeshReady += OnTerrainChunkCollisionReady;
-                        newChunk.Load();
-                    }
+                        CreateNewTerrainChunk(viewedChunkCoord);
                 }
             }
 
@@ -122,20 +113,23 @@ namespace Generators.Terrain
             objectGenerator?.UpdateLoadedChunks(currentChunkCoord);
         }
 
-        private void OnTerrainChunkVisibilityChanged(TerrainChunk chunk, bool isVisible)
+        private void CreateNewTerrainChunk(Vector2Int viewedChunkCoord)
+        {
+            TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
+
+            terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
+            newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
+            newChunk.Load();
+        }
+
+        private void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool isVisible)
         {
             if (isVisible)
-                visibleTerrainChunks.Add(chunk);
+                visibleTerrainChunks.Add(terrainChunk);
             else
-                visibleTerrainChunks.Remove(chunk);
-
-            objectGenerator?.OnChunkVisibilityChanged(chunk, isVisible);
-        }
-        
-        private void OnTerrainChunkCollisionReady(TerrainChunk chunk)
-        {
-            IBiomeProvider biomeProvider = new LocalBiomeMapProvider(chunk.terrainContextMap.biomeDensityMap, worldSettings.biomes);
-            objectGenerator?.OnChunkCollisionReady(chunk, biomeProvider);
+                visibleTerrainChunks.Remove(terrainChunk);
+            
+            objectGenerator?.OnTerrainChunkVisibilityChanged(terrainChunk, isVisible);
         }
         
         private bool IsChunkCoordInsideWorld(Vector2 coord)
@@ -171,7 +165,6 @@ namespace Generators.Terrain
             TerrainChunk newChunk = new(chunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
             terrainChunkDictionary.Add(chunkCoord, newChunk);
             newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
-            newChunk.onCollisionMeshReady += OnTerrainChunkCollisionReady;
             newChunk.Load();
 
             return newChunk;

@@ -12,7 +12,6 @@ using WorldGeneration.Borders;
 public class TerrainChunk
 {
     public event Action<TerrainChunk, bool> onVisibilityChanged;
-    public event Action<TerrainChunk> onCollisionMeshReady;
     
     public Vector2Int coordinates;
 
@@ -247,8 +246,6 @@ public class TerrainChunk
 
         meshCollider.sharedMesh = colliderLod.colliderMesh;
         hasSetCollider = true;
-
-        onCollisionMeshReady?.Invoke(this);
     }
 
     private void SetVisible(bool visible)
