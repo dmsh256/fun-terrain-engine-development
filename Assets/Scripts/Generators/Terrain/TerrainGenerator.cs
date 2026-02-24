@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Generators.BiomeMap;
 using Settings;
 using UnityEngine;
 using WorldGeneration;
