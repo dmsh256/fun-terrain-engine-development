@@ -6,6 +6,11 @@ Shader "Custom/GrassInstancedIndirectLit"
         _BaseMap ("Albedo", 2D) = "white" {}
         _Cutoff ("Alpha Cutoff", Range(0,1)) = 0.5
         _AlphaClip ("Alpha Clip", Float) = 1
+        
+        _WindDirection ("Wind Direction", Vector) = (1,0,0,0)
+        _WindStrength ("Wind Strength", Float) = 0.2
+        _WindFrequency ("Wind Frequency", Float) = 1.0
+        _WindBendHeight ("Bend Height Influence", Float) = 1.0
     }
 
     SubShader
@@ -28,7 +33,6 @@ Shader "Custom/GrassInstancedIndirectLit"
 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS
             #pragma multi_compile_fog
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -42,6 +46,11 @@ Shader "Custom/GrassInstancedIndirectLit"
             float _Cutoff;
             float _AlphaClip;
 
+            float4 _WindDirection;
+            float _WindStrength;
+            float _WindFrequency;
+            float _WindBendHeight;
+            
             StructuredBuffer<float4x4> _InstanceMatrices;
 
             struct Attributes
@@ -68,8 +77,22 @@ Shader "Custom/GrassInstancedIndirectLit"
                 Varyings output;
 
                 float4x4 instanceMatrix = _InstanceMatrices[input.instanceID];
-
                 float4 worldPosition = mul(instanceMatrix, float4(input.positionOS, 1.0));
+                
+                 // wind stage
+                float3 windDir = normalize(_WindDirection.xyz);
+                
+                float heightFactor = saturate(input.positionOS.y * _WindBendHeight);
+                float randomOffset = frac(sin(input.instanceID * 12.9898) * 43758.5453);
+                float wave = sin(_Time.y * _WindFrequency + randomOffset * 6.28 + worldPosition.x * 0.5 + worldPosition.z * 0.5);
+                float bendAmount = wave * _WindStrength * heightFactor;
+                // a little gust
+                float gust = sin(_Time.y * 0.2) * 0.5 + 0.1;
+                bendAmount *= gust;
+                
+                worldPosition.xyz += windDir * bendAmount;
+                //
+                
                 float3 worldNormal   = normalize(mul((float3x3)instanceMatrix, input.normalOS));
 
                 output.positionWS = worldPosition.xyz;

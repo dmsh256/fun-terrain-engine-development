@@ -13,5 +13,4 @@ MonoBehaviour:
   m_Name: Swamp Biome Terrain Shaper
   m_EditorClassIdentifier: Assembly-CSharp::Generators.BiomeMap.BiomeTerrainShapers.Generators.BiomeMap.BiomeTerrainShapers.SwampBiomeTerrainShaper
   targetHeight: 0.03
-  dominanceThreshold: 0.02
-  flattenStrength: 6
+  flattenStrength: 2
