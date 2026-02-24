@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Generators.BiomeMap;
 using Generators.Grass;
+using Managers.Chunks;
 using Settings;
 using UnityEngine;
 using WorldGeneration;
@@ -18,11 +19,11 @@ namespace Generators.ObjectGenerator
         private readonly Dictionary<Vector2, GrassChunk> grassChunks = new();
         private readonly Dictionary<Vector2, ChunkSpawnContext> dataReadyChunks = new();
         private readonly List<GrassChunk> visibleGrassChunks = new();
-        private readonly Queue<ChunkSpawnContext> spawnQueue = new();
-        private readonly List<ObjectChunk> chunksSpawning = new();
         
         private MeshSettings meshSettings;
         private WorldSettings worldSettings;
+        
+        private ChunkSpawnScheduler scheduler;
         
         [SerializeField]
         private GrassIndirectRenderer grassRenderer;
@@ -47,47 +48,13 @@ namespace Generators.ObjectGenerator
                 grassRenderer = GetComponent<GrassIndirectRenderer>();
             if (!grassRenderer)
                 grassRenderer = gameObject.AddComponent<GrassIndirectRenderer>();
+            
+            scheduler = new ChunkSpawnScheduler(maxChunkSpawnsPerFrame, maxObjectsPerFrame, SpawnFromScheduler);
         }
-
+        
         private void Update()
         {
-            ProcessSpawnQueue();
-            ProcessObjectSpawning();
-        }
-        
-        private void ProcessSpawnQueue()
-        {
-            int processed = 0;
-
-            while (spawnQueue.Count > 0 && processed < maxChunkSpawnsPerFrame)
-            {
-                ChunkSpawnContext context = spawnQueue.Dequeue();
-
-                if (objectChunks.ContainsKey(context.chunk.coordinates))
-                    continue;
-
-                SpawnObjectChunk(context.chunk, context.biomeProvider);
-                processed++;
-            }
-        }
-        
-        private void ProcessObjectSpawning()
-        {
-            int remainingBudget = maxObjectsPerFrame;
-
-            for (int i = chunksSpawning.Count - 1; i >= 0; i--)
-            {
-                if (remainingBudget <= 0)
-                    break;
-
-                ObjectChunk chunk = chunksSpawning[i];
-
-                int spawned = chunk.SpawnStep(remainingBudget);
-                remainingBudget -= spawned;
-
-                if (spawned == 0)
-                    chunksSpawning.RemoveAt(i);
-            }
+            scheduler.Update();
         }
         
         public void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool visible)
@@ -165,22 +132,11 @@ namespace Generators.ObjectGenerator
                 if (objectChunks.ContainsKey(spawnContext.chunk.coordinates))
                     continue;
 
-                if (!objectChunks.ContainsKey(spawnContext.chunk.coordinates) &&
-                    !IsAlreadyQueued(spawnContext.chunk.coordinates))
+                if (!objectChunks.ContainsKey(spawnContext.chunk.coordinates))
                 {
-                    spawnQueue.Enqueue(spawnContext);
+                    scheduler.Enqueue(spawnContext);
                 }
             }
-        }
-        
-        private bool IsAlreadyQueued(Vector2 coordinates) // TODO doubtful, requires review
-        {
-            foreach (ChunkSpawnContext chunkSpawnContext in spawnQueue)
-            {
-                if (chunkSpawnContext.chunk.coordinates == coordinates)
-                    return true;
-            }
-            return false;
         }
 
         public void SetCurrentChunkCoordinates(Vector2Int chunkCoordinates)
@@ -194,6 +150,14 @@ namespace Generators.ObjectGenerator
                    Mathf.Abs(sampleChunkCoordinates.y - currentChunksCoordinates.y) <= chunkLoadRadius;
         }
 
+        private void SpawnFromScheduler(ChunkSpawnContext context)
+        {
+            if (objectChunks.ContainsKey(context.chunk.coordinates))
+                return;
+
+            SpawnObjectChunk(context.chunk, context.biomeProvider);
+        }
+        
         private void SpawnObjectChunk(TerrainChunk terrainChunk, IBiomeProvider biomeProvider)
         {
             if (objectChunks.ContainsKey(terrainChunk.coordinates))
@@ -225,7 +189,7 @@ namespace Generators.ObjectGenerator
             ObjectChunk objectChunk = new (terrainSpawnData, transform, biomeProvider);
             objectChunks.Add(terrainChunk.coordinates, objectChunk);
             objectChunk.PrepareSpawn();
-            chunksSpawning.Add(objectChunk);
+            scheduler.RegisterSpawningChunk(objectChunk);
         }
 
         private void UpdateGrassChunkVisibility(GrassChunk grassChunk, bool visible)
@@ -242,18 +206,6 @@ namespace Generators.ObjectGenerator
 
             visibleGrassChunks.Remove(grassChunk);
             grassRenderer?.SetVisibleChunks(visibleGrassChunks);
-        }
-
-        private readonly struct ChunkSpawnContext
-        {
-            public readonly TerrainChunk chunk;
-            public readonly IBiomeProvider biomeProvider;
-
-            public ChunkSpawnContext(TerrainChunk chunk, IBiomeProvider biomeProvider)
-            {
-                this.chunk = chunk;
-                this.biomeProvider = biomeProvider;
-            }
         }
         
         private void OnDisable()
@@ -278,8 +230,6 @@ namespace Generators.ObjectGenerator
             objectChunks.Clear();
 
             visibleGrassChunks.Clear();
-            spawnQueue.Clear();
-            chunksSpawning.Clear();
         }
     }
 }
