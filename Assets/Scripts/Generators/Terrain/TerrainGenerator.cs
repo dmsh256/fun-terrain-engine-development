@@ -147,27 +147,15 @@ namespace Generators.Terrain
                 for (int x = -collisionMeshLoadRadius; x <= collisionMeshLoadRadius; x++)
                 {
                     Vector2Int collisionChunkCoord = new(currentChunkCoordX + x, currentChunkCoordY + y);
-
                     if (!IsChunkCoordInsideWorld(collisionChunkCoord))
                         continue;
 
-                    TerrainChunk chunk = EnsureChunkExists(collisionChunkCoord);
-                    chunk.RequestCollisionMesh(true);
+                    if (terrainChunkDictionary.TryGetValue(collisionChunkCoord, out TerrainChunk terrainChunk))
+                    {
+                        terrainChunk.RequestCollisionMesh(true);
+                    }
                 }
             }
-        }
-
-        private TerrainChunk EnsureChunkExists(Vector2Int chunkCoord)
-        {
-            if (terrainChunkDictionary.TryGetValue(chunkCoord, out TerrainChunk existingChunk))
-                return existingChunk;
-
-            TerrainChunk newChunk = new(chunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
-            terrainChunkDictionary.Add(chunkCoord, newChunk);
-            newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
-            newChunk.Load();
-
-            return newChunk;
         }
 
         public List<TerrainChunk> GetVisibleTerrainChunks()
