@@ -62,15 +62,18 @@ namespace Generators.ObjectGenerator
 
         public void UpdateLoadedChunks(Vector2Int currentChunkCoordinates, List<TerrainChunk> visibleChunks)
         {
-            List<Vector2> spawnedCoords = new (objectManager.GetSpawnedCoords());
-            foreach (Vector2 coord in spawnedCoords)
+            List<Vector2> toRemove = new ();
+            objectManager.ForEachSpawned(coord =>
             {
-                Vector2Int chunkCoord = new((int)coord.x, (int)coord.y);
+                Vector2Int chunkCoord = new ((int)coord.x, (int)coord.y);
                 if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
-                {
-                    grassManager.Remove(coord);
-                    objectManager.Remove(coord);
-                }
+                    toRemove.Add(coord);
+            });
+
+            foreach (Vector2 coord in toRemove)
+            {
+                grassManager.Remove(coord);
+                objectManager.Remove(coord);
             }
 
             foreach (TerrainChunk terrainChunk in visibleChunks)
@@ -82,7 +85,7 @@ namespace Generators.ObjectGenerator
                 if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
                     continue;
 
-                if (objectManager.IsSpawned(coord))
+                if (objectManager.IsSpawned(coord) || chunkSpawnScheduler.IsQueued(coord))
                     continue;
 
                 chunkSpawnScheduler.Enqueue(terrainChunk);

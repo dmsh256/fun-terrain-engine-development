@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Generators.ObjectGenerator;
+using UnityEngine;
 
 namespace Managers.Chunks
 {
@@ -8,6 +9,8 @@ namespace Managers.Chunks
         private readonly Queue<TerrainChunk> spawnQueue = new();
         private readonly List<ObjectChunk> chunksSpawning = new();
 
+        private readonly HashSet<Vector2> queuedCoords = new();
+        
         private readonly int maxChunkSpawnsPerFrame;
         private readonly int maxObjectsPerFrame;
 
@@ -22,7 +25,13 @@ namespace Managers.Chunks
 
         public void Enqueue(TerrainChunk terrainChunk)
         {
+            Vector2 coord = terrainChunk.coordinates;
+
+            if (queuedCoords.Contains(coord))
+                return;
+
             spawnQueue.Enqueue(terrainChunk);
+            queuedCoords.Add(coord);
         }
 
         public void RegisterSpawningChunk(ObjectChunk chunk)
@@ -43,9 +52,15 @@ namespace Managers.Chunks
             while (spawnQueue.Count > 0 && processed < maxChunkSpawnsPerFrame)
             {
                 TerrainChunk terrainChunk = spawnQueue.Dequeue();
+                queuedCoords.Remove(terrainChunk.coordinates);
                 spawnAction.Invoke(terrainChunk);
                 processed++;
             }
+        }
+        
+        public bool IsQueued(Vector2 coord)
+        {
+            return queuedCoords.Contains(coord);
         }
 
         private void ProcessObjectSpawning()

@@ -34,6 +34,12 @@ namespace Managers.Objects
             objectChunk.PrepareSpawn();
             chunkSpawnScheduler.RegisterSpawningChunk(objectChunk);
         }
+        
+        public void ForEachSpawned(System.Action<Vector2> action)
+        {
+            foreach (Vector2 coord in objectChunks.Keys)
+                action(coord);
+        }
 
         public void Remove(Vector2 coord)
         {
