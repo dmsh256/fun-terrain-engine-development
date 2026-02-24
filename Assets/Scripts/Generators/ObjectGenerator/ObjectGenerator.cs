@@ -17,7 +17,6 @@ namespace Generators.ObjectGenerator
         private readonly Dictionary<Vector2, ObjectChunk> objectChunks = new();
         private readonly Dictionary<Vector2, GrassChunk> grassChunks = new();
         private readonly Dictionary<Vector2, ChunkSpawnContext> dataReadyChunks = new();
-        private readonly HashSet<Vector2> visibleGrassChunkCoords = new();
         private readonly List<GrassChunk> visibleGrassChunks = new();
         private readonly Queue<ChunkSpawnContext> spawnQueue = new();
         private readonly List<ObjectChunk> chunksSpawning = new();
@@ -105,7 +104,6 @@ namespace Generators.ObjectGenerator
                 return;
             }
             
-            visibleGrassChunkCoords.Remove(coord);
             if (grassChunks.TryGetValue(coord, out GrassChunk hiddenGrassChunk))
             {
                 hiddenGrassChunk.Release();
@@ -153,7 +151,6 @@ namespace Generators.ObjectGenerator
                     UpdateGrassChunkVisibility(grassChunk, false);
                 }
 
-                visibleGrassChunkCoords.Remove(chunkCoord);
                 objectChunks[chunkCoord].Despawn();
                 objectChunks.Remove(chunkCoord);
                 grassChunks.Remove(chunkCoord);
@@ -281,7 +278,6 @@ namespace Generators.ObjectGenerator
             objectChunks.Clear();
 
             visibleGrassChunks.Clear();
-            visibleGrassChunkCoords.Clear();
             spawnQueue.Clear();
             chunksSpawning.Clear();
         }
