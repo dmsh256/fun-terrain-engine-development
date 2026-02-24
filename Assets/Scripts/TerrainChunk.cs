@@ -84,7 +84,7 @@ public class TerrainChunk
         meshObject.transform.parent = parent;
         SetVisible(false);
 
-        CreateWater(worldSettings.waterMaterial); // TODO do not create when min height > water height 
+        CreateWater(worldSettings.waterMaterial);
         
         lodMeshes = new LODMesh[detailLevels.Length];
         for (int i = 0; i < detailLevels.Length; i++)
