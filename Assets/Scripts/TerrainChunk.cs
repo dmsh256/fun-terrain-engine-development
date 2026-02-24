@@ -185,7 +185,7 @@ public class TerrainChunk
     {
         BiomeDensityMap biomeMap = terrainContextMap.biomeDensityMap;
         
-        if (biomeMap.borderDistance == null) 
+        if (biomeMap.dominance == null) 
             return;
 
         int step = 2;
@@ -202,11 +202,11 @@ public class TerrainChunk
                 if (primary < 0)
                     continue;
 
-                float borderDistance = biomeMap.borderDistance[x, y];
-                float lineScale = 0.9f;
-                Vector3 end = start + Vector3.up * borderDistance * lineScale;
+                float dominance = biomeMap.dominance[x, y];
+                float lineScale = 40f;
+                Vector3 end = start + Vector3.up * dominance * lineScale;
 
-                drawLine(start, end, new Color(255, 255, 255));
+                drawLine(start, end, worldSettings.biomes[primary].debugColor);
             }
         }
     }
@@ -286,7 +286,8 @@ public class TerrainChunk
 
     private void CreateWater(Material material)
     {
-        if (terrainContextMap.heightMap.minValue * terrainContextMap.heightMap.heightMultiplier > worldSettings.waterLevel)
+        float waterLevel = worldSettings.waterLevel * heightMapSettings.heightMultiplier;
+        if (terrainContextMap.heightMap.minValue * terrainContextMap.heightMap.heightMultiplier > waterLevel)
             return;
         
         waterObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -298,7 +299,7 @@ public class TerrainChunk
 
         waterObject.transform.localPosition = new Vector3(
             meshSettings.meshWorldSize * 0.5f,
-            worldSettings.waterLevel,
+            waterLevel,
             meshSettings.meshWorldSize * 0.5f
         );
 
@@ -306,7 +307,7 @@ public class TerrainChunk
         renderer.material = material;
 
         if (renderer.material.HasProperty("_WaterHeight"))
-            renderer.material.SetFloat("_WaterHeight", worldSettings.waterLevel);
+            renderer.material.SetFloat("_WaterHeight", waterLevel);
 
         GameObject.Destroy(waterObject.GetComponent<Collider>());
     }

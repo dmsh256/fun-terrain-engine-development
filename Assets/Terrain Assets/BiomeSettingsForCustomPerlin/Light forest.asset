@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Light forest
   m_EditorClassIdentifier: Assembly-CSharp::WorldGeneration.Biomes.BiomeData
   biomeName: Forest
-  debugColor: {r: 0, g: 0.6415094, b: 0.06842761, a: 0}
+  debugColor: {r: 0, g: 0.6415094, b: 0.06842761, a: 1}
   globalWeight: 0.8
   minHeight: 0.03
   maxHeight: 0.6
@@ -71,3 +71,4 @@ MonoBehaviour:
     weight: 50
     scale: 1
     yOffset: -0.1
+  isWater: 0

@@ -9,6 +9,5 @@ namespace WorldGeneration.Biomes
         public int[,] secondary;
 
         public float[,] dominance;
-        public int[,] borderDistance;
     }
 }

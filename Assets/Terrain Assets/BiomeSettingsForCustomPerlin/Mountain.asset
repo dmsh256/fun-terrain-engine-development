@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Mountain
   m_EditorClassIdentifier: Assembly-CSharp::WorldGeneration.Biomes.BiomeData
   biomeName: Mountain
-  debugColor: {r: 0.7059648, g: 0.7610062, b: 0.7527228, a: 0}
+  debugColor: {r: 0.7059648, g: 0.7610062, b: 0.7527228, a: 1}
   globalWeight: 1
   minHeight: 0.6
   maxHeight: 100
@@ -43,3 +43,4 @@ MonoBehaviour:
   hasGrass: 0
   grassDensity: 0
   grassVariants: []
+  isWater: 0

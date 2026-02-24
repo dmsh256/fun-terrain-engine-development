@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Deep water
   m_EditorClassIdentifier: Assembly-CSharp::WorldGeneration.Biomes.BiomeData
   biomeName: Deep water
-  debugColor: {r: 0.052213065, g: 0.080776446, b: 0.5031446, a: 0}
+  debugColor: {r: 0.052213065, g: 0.080776446, b: 0.5031446, a: 1}
   globalWeight: 1
   minHeight: 0
   maxHeight: 0.03
@@ -28,3 +28,4 @@ MonoBehaviour:
   hasGrass: 0
   grassDensity: 0
   grassVariants: []
+  isWater: 1

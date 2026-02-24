@@ -9,9 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 764b2c02a5a6474a929f6957192a6ca0, type: 3}
+  m_Script: {fileID: 11500000, guid: 5f836eab3308478ca0c5e00645391a7f, type: 3}
   m_Name: Mountain Biome Terrain Shaper
   m_EditorClassIdentifier: Assembly-CSharp::Generators.BiomeMap.BiomeTerrainShapers.MountainBiomeTerrainShaper
-  ridgeFrequency: 10
-  ridgeStrength: 0.1
-  heightExponent: 1.1
+  strength: 2

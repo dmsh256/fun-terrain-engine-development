@@ -13,7 +13,7 @@ namespace Generators.BiomeMap.BiomeTerrainShapers
         public BiomeDensityMap biomeMap;
         public BiomeData[] biomes;
 
-        public int borderDistance;
+        public float dominance;
         
         public int primaryBiome;
         public int secondaryBiome;

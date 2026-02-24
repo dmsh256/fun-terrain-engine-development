@@ -17,9 +17,11 @@ namespace Generators.HeightMap
         private readonly IBiomeMapGenerator biomeGenerator;
         private readonly StructuralHeightMapGenerator structuralHeightMapGenerator = new();
         private readonly HeightMapProcessor heightMapProcessor = new();
+        private readonly WorldSettings worldSettings;
         
         public TerrainContextMapGenerator(WorldSettings worldSettings)
         {
+            this.worldSettings = worldSettings;
             biomeGenerator = BiomeGeneratorFactory.GetBiomeMapGenerator(worldSettings);
         }
         
@@ -28,7 +30,7 @@ namespace Generators.HeightMap
             float[,] structuralHeight = structuralHeightMapGenerator.GenerateStructuralHeightMap(width, length, settings, sampleCentre);
 
             BiomeDensityMap biomeDensityMap =
-                biomeGenerator.GenerateBiomeMap(width, length, biomes, structuralHeight, sampleCentre);
+                biomeGenerator.GenerateBiomeMap(width, length, biomes, structuralHeight, sampleCentre, worldSettings);
             
             return heightMapProcessor.ProcessHeight(structuralHeight, settings, sampleCentre, biomeDensityMap, biomes);
         }

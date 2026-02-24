@@ -18,6 +18,8 @@ namespace Settings.Biome
         public float minHeight;
         public float maxHeight;
         
+        public bool isWater;
+        
         public BiomeTerrainShaper terrainShaper;
         
         [Header("Terrain")]
