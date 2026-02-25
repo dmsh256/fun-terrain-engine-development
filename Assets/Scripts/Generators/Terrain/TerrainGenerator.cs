@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Settings;
+using UI.LoadingScreen;
 using UnityEngine;
 using WorldGeneration;
 using WorldGeneration.Biomes;
@@ -40,9 +41,15 @@ namespace Generators.Terrain
         
         [SerializeField]
         private LayerMask layerMask;
+
+        [SerializeField]
+        public LoadingScreen loadingScreen;
+        private bool initialLoading = true;
         
         public void Start()
         {
+            loadingScreen.Show();
+            
             Texture2DArray albedoArray =
                 BiomeAlbedoArrayBuilder.Build(worldSettings.biomes);
 
@@ -57,7 +64,7 @@ namespace Generators.Terrain
 
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
             currentChunkCoord = GetChunkCoord(viewerPosition);
-            UpdateVisibleChunks();
+            UpdateOrCreateVisibleChunks();
         }
 
         public void Update()
@@ -68,11 +75,11 @@ namespace Generators.Terrain
             if (newChunkCoord != currentChunkCoord)
             {
                 currentChunkCoord = newChunkCoord;
-                UpdateVisibleChunks();
+                UpdateOrCreateVisibleChunks();
             }
         }
 
-        private void UpdateVisibleChunks()
+        private void UpdateOrCreateVisibleChunks()
         {
             HashSet<Vector2> alreadyUpdatedChunkCoords = new();
 
@@ -131,6 +138,12 @@ namespace Generators.Terrain
                     existingChunk.UpdateTerrainChunk();
                 else
                     CreateAndLoadNewTerrainChunk(viewedChunkCoord);
+            }
+            
+            if (initialLoading)
+            {
+                loadingScreen.Hide();
+                initialLoading = false;
             }
         }
 
