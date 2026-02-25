@@ -9,11 +9,6 @@ namespace Generators.Terrain
 {
     public class TerrainGenerator : MonoBehaviour
     {
-        private const float ViewerMoveThresholdForChunkUpdate = 25f;
-
-        private const float SqrViewerMoveThresholdForChunkUpdate =
-            ViewerMoveThresholdForChunkUpdate * ViewerMoveThresholdForChunkUpdate;
-
         public WorldSettings worldSettings;
         
         public int colliderLODIndex;
@@ -32,7 +27,7 @@ namespace Generators.Terrain
         public ObjectGenerator.ObjectLifecycleController objectLifecycleController;
         
         private Vector2 viewerPosition;
-        private Vector2 viewerPositionOld;
+        private Vector2Int currentChunkCoord;
 
         private float meshWorldSize;
         private int chunksVisibleInViewDst;
@@ -58,7 +53,7 @@ namespace Generators.Terrain
             objectLifecycleController?.Init(meshSettings, worldSettings);
 
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
-            viewerPositionOld = viewerPosition;
+            currentChunkCoord = GetChunkCoord(viewerPosition);
             UpdateVisibleChunks();
         }
 
@@ -66,11 +61,12 @@ namespace Generators.Terrain
         {
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
 
-            if (!((viewerPositionOld - viewerPosition).sqrMagnitude > SqrViewerMoveThresholdForChunkUpdate)) 
-                return;
-        
-            viewerPositionOld = viewerPosition;
-            UpdateVisibleChunks();
+            Vector2Int newChunkCoord = GetChunkCoord(viewerPosition);
+            if (newChunkCoord != currentChunkCoord)
+            {
+                currentChunkCoord = newChunkCoord;
+                UpdateVisibleChunks();
+            }
         }
 
         private void UpdateVisibleChunks()
@@ -86,7 +82,7 @@ namespace Generators.Terrain
             int currentChunkCoordX = Mathf.RoundToInt(viewerPosition.x / meshWorldSize);
             int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / meshWorldSize);
             
-            Vector2Int currentChunkCoord = new(currentChunkCoordX, currentChunkCoordY);
+            Vector2Int chunkCoordinates = new(currentChunkCoordX, currentChunkCoordY);
 
             for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
             {
@@ -108,7 +104,7 @@ namespace Generators.Terrain
             }
 
             UpdateCollisionChunks(currentChunkCoordX, currentChunkCoordY);
-            objectLifecycleController?.UpdateLoadedChunks(currentChunkCoord, visibleTerrainChunks);
+            objectLifecycleController?.UpdateLoadedChunks(chunkCoordinates, visibleTerrainChunks);
         }
 
         private void CreateNewTerrainChunk(Vector2Int viewedChunkCoord)
@@ -164,6 +160,13 @@ namespace Generators.Terrain
         private void Awake()
         {
             WorldContext.Initialize(worldSettings);
+        }
+        
+        private Vector2Int GetChunkCoord(Vector2 position)
+        {
+            int x = Mathf.RoundToInt(position.x / meshWorldSize);
+            int y = Mathf.RoundToInt(position.y / meshWorldSize);
+            return new Vector2Int(x, y);
         }
     }
 
