@@ -35,6 +35,8 @@ namespace Generators.ObjectGenerator
         public Mesh grassMesh;
         public Material grassMaterial;
         
+        private Vector2Int currentChunkCoord;
+        
         public void Init(MeshSettings meshSettings, WorldSettings worldSettings)
         {
             this.meshSettings = meshSettings;
@@ -55,9 +57,29 @@ namespace Generators.ObjectGenerator
             chunkSpawnScheduler?.Update();
         }
         
+        public void SetCurrentChunk(Vector2Int chunkCoord)
+        {
+            currentChunkCoord = chunkCoord;
+        }
+        
         public void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool visible)
         {
-            grassManager.SetVisibility(terrainChunk.coordinates, visible);
+            Vector2 terrainChunkCoordinates = terrainChunk.coordinates;
+
+            grassManager.SetVisibility(terrainChunkCoordinates, visible);
+
+            if (!visible)
+                return;
+
+            Vector2Int chunkCoord = new((int)terrainChunkCoordinates.x, (int)terrainChunkCoordinates.y);
+
+            if (!IsWithinRadius(chunkCoord, currentChunkCoord))
+                return;
+
+            if (objectManager.IsSpawned(terrainChunkCoordinates) || chunkSpawnScheduler.IsQueued(terrainChunkCoordinates))
+                return;
+
+            chunkSpawnScheduler.Enqueue(terrainChunk);
         }
 
         public void UpdateLoadedChunks(Vector2Int currentChunkCoordinates, List<TerrainChunk> visibleChunks)

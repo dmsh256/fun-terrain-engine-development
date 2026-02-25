@@ -98,6 +98,13 @@ namespace Generators.Terrain
 
             UpdateCollisionChunks(currentChunkCoordX, currentChunkCoordY);
             objectLifecycleController?.UpdateLoadedChunks(chunkCoordinates, visibleTerrainChunks);
+            objectLifecycleController?.SetCurrentChunk(chunkCoordinates);
+            
+            if (initialLoading)
+            {
+                loadingScreen.Hide();
+                initialLoading = false;
+            }
         }
 
         private void DoCreateOrUpdateChunks(int currentChunkCoordX, int currentChunkCoordY, HashSet<Vector2> alreadyUpdatedChunkCoords)
@@ -138,12 +145,6 @@ namespace Generators.Terrain
                     existingChunk.UpdateTerrainChunk();
                 else
                     CreateAndLoadNewTerrainChunk(viewedChunkCoord);
-            }
-            
-            if (initialLoading)
-            {
-                loadingScreen.Hide();
-                initialLoading = false;
             }
         }
 
