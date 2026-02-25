@@ -125,8 +125,8 @@ public class TerrainChunk
         }
 
         TerrainContextMapGenerator generator = new(worldSettings);
-        terrainContextMap = generator.GenerateTerrainContextMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers
-        );
+        terrainContextMap = generator.GenerateTerrainContextMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, 
+            heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers);
 
         heightMapReceived = true;
         biomeMapReceived = true;
@@ -134,7 +134,9 @@ public class TerrainChunk
         int lodIndex = 0;
         LODMesh lodMesh = lodMeshes[lodIndex];
 
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(terrainContextMap.heightMap.values, terrainContextMap.biomeDensityMap.primary, meshSettings, detailLevels[lodIndex].lod);
+        MeshData meshData = MeshGenerator.GenerateTerrainMesh(terrainContextMap.heightMap.values, 
+            terrainContextMap.biomeDensityMap.primary, meshSettings, detailLevels[lodIndex].lod);
+        
         Mesh mesh = meshData.CreateMesh();
         meshFilter.mesh = mesh;
         meshCollider.sharedMesh = mesh;
@@ -143,7 +145,9 @@ public class TerrainChunk
         previousLODIndex = lodIndex;
         LODMesh colliderLod = lodMeshes[colliderLODIndex];
         
-        ColliderMeshData colliderMeshData = ColliderMeshGenerator.GenerateColliderMesh(terrainContextMap.heightMap.values, meshSettings, detailLevels[colliderLODIndex].lod);
+        ColliderMeshData colliderMeshData = ColliderMeshGenerator.GenerateColliderMesh(terrainContextMap.heightMap.values, 
+            meshSettings, detailLevels[colliderLODIndex].lod);
+        
         Mesh colliderMesh = colliderMeshData.CreateColliderMesh();
         meshCollider.sharedMesh = colliderMesh;
         colliderLod.colliderMesh = colliderMesh;
