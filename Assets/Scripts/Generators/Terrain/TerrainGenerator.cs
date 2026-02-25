@@ -9,6 +9,9 @@ namespace Generators.Terrain
 {
     public class TerrainGenerator : MonoBehaviour
     {
+        private static readonly int BiomeAlbedoArray = Shader.PropertyToID("_BiomeAlbedoArray");
+        private static readonly int BiomeCount = Shader.PropertyToID("_BiomeCount");
+        
         public WorldSettings worldSettings;
         
         public int colliderLODIndex;
@@ -43,8 +46,8 @@ namespace Generators.Terrain
             Texture2DArray albedoArray =
                 BiomeAlbedoArrayBuilder.Build(worldSettings.biomes);
 
-            terrainMaterial.SetTexture("_BiomeAlbedoArray", albedoArray);
-            terrainMaterial.SetInt("_BiomeCount", worldSettings.biomes.Length);
+            terrainMaterial.SetTexture(BiomeAlbedoArray, albedoArray);
+            terrainMaterial.SetInt(BiomeCount, worldSettings.biomes.Length);
 
             float maxViewDistance = detailLevels[^1].visibleDstThreshold;
             meshWorldSize = meshSettings.meshWorldSize;
@@ -83,31 +86,55 @@ namespace Generators.Terrain
             int currentChunkCoordY = Mathf.RoundToInt(viewerPosition.y / meshWorldSize);
             
             Vector2Int chunkCoordinates = new(currentChunkCoordX, currentChunkCoordY);
-
-            for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
-            {
-                for (int x = -chunksVisibleInViewDst; x <= chunksVisibleInViewDst; x++)
-                {
-                    Vector2Int viewedChunkCoord = new(currentChunkCoordX + x, currentChunkCoordY + y);
-
-                    if (!IsChunkCoordInsideWorld(viewedChunkCoord))
-                        continue;
-
-                    if (alreadyUpdatedChunkCoords.Contains(viewedChunkCoord))
-                        continue;
-
-                    if (terrainChunkDictionary.TryGetValue(viewedChunkCoord, out TerrainChunk existingChunk))
-                        existingChunk.UpdateTerrainChunk();
-                    else
-                        CreateNewTerrainChunk(viewedChunkCoord);
-                }
-            }
+            
+            DoCreateOrUpdateChunks(currentChunkCoordX, currentChunkCoordY, alreadyUpdatedChunkCoords);
 
             UpdateCollisionChunks(currentChunkCoordX, currentChunkCoordY);
             objectLifecycleController?.UpdateLoadedChunks(chunkCoordinates, visibleTerrainChunks);
         }
 
-        private void CreateNewTerrainChunk(Vector2Int viewedChunkCoord)
+        private void DoCreateOrUpdateChunks(int currentChunkCoordX, int currentChunkCoordY, HashSet<Vector2> alreadyUpdatedChunkCoords)
+        {
+            List<Vector2Int> candidateCoords = new();
+            for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
+            {
+                for (int x = -chunksVisibleInViewDst; x <= chunksVisibleInViewDst; x++)
+                {
+                    Vector2Int coord = new(currentChunkCoordX + x, currentChunkCoordY + y);
+
+                    if (!IsChunkCoordInsideWorld(coord))
+                        continue;
+
+                    if (alreadyUpdatedChunkCoords.Contains(coord))
+                        continue;
+
+                    candidateCoords.Add(coord);
+                }
+            }
+            
+            candidateCoords.Sort((a, b) =>
+            {
+                int dxA = a.x - currentChunkCoordX;
+                int dyA = a.y - currentChunkCoordY;
+                int dxB = b.x - currentChunkCoordX;
+                int dyB = b.y - currentChunkCoordY;
+
+                int distA = dxA * dxA + dyA * dyA;
+                int distB = dxB * dxB + dyB * dyB;
+
+                return distA.CompareTo(distB);
+            });
+            
+            foreach (Vector2Int viewedChunkCoord in candidateCoords)
+            {
+                if (terrainChunkDictionary.TryGetValue(viewedChunkCoord, out TerrainChunk existingChunk))
+                    existingChunk.UpdateTerrainChunk();
+                else
+                    CreateAndLoadNewTerrainChunk(viewedChunkCoord);
+            }
+        }
+
+        private void CreateAndLoadNewTerrainChunk(Vector2Int viewedChunkCoord)
         {
             TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
 
