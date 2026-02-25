@@ -44,7 +44,7 @@ namespace Generators.Terrain
 
         [SerializeField]
         public LoadingScreen loadingScreen;
-        private bool initialLoading = true;
+        private bool isInitialLoading = true;
         
         public void Start()
         {
@@ -99,16 +99,15 @@ namespace Generators.Terrain
             UpdateCollisionChunks(currentChunkCoordX, currentChunkCoordY);
             objectLifecycleController?.UpdateLoadedChunks(chunkCoordinates, visibleTerrainChunks);
             objectLifecycleController?.SetCurrentChunk(chunkCoordinates);
-            
-            if (initialLoading)
-            {
-                loadingScreen?.Hide();
-                initialLoading = false;
-            }
         }
 
         private void DoCreateOrUpdateChunks(int currentChunkCoordX, int currentChunkCoordY, HashSet<Vector2> alreadyUpdatedChunkCoords)
         {
+            if (isInitialLoading)
+            {
+                LoadInitialChunksSync();
+            }
+            
             List<Vector2Int> candidateCoords = new();
             for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
             {
@@ -148,15 +147,53 @@ namespace Generators.Terrain
             }
         }
 
+        private void LoadInitialChunksSync()
+        {
+            List<Vector2Int> initialCoords = new()
+            {
+                currentChunkCoord,
+                currentChunkCoord - Vector2Int.right,
+                currentChunkCoord - Vector2Int.up,
+                currentChunkCoord - Vector2Int.one
+            };
+
+            foreach (Vector2Int initialCoord in initialCoords)
+            {
+                CreateAndLoadNewTerrainChunkSync(initialCoord);
+            }
+
+            PlacePlayer();
+                
+            loadingScreen?.Hide();
+            isInitialLoading = false;
+        }
+
+        private void PlacePlayer()
+        {
+            Rigidbody rigidBody = viewer.GetComponentInParent<Rigidbody>();
+            Collider collider = rigidBody.GetComponent<Collider>();
+            collider.enabled = false;
+
+            Ray ray = new (viewer.position + Vector3.up * 100f, Vector3.down);
+            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, layerMask))
+            {
+                rigidBody.MovePosition(
+                    new Vector3(rigidBody.position.x, hit.point.y + 1.5f, rigidBody.position.z)
+                );
+            }
+            
+            collider.enabled = true;
+        }
+        
         private void CreateAndLoadNewTerrainChunk(Vector2Int viewedChunkCoord)
         {
             TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
 
             terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
             newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
-            newChunk.Load();
+            newChunk.LoadAsync();
         }
-
+        
         private void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool isVisible)
         {
             if (isVisible)
@@ -165,6 +202,15 @@ namespace Generators.Terrain
                 visibleTerrainChunks.Remove(terrainChunk);
             
             objectLifecycleController?.OnTerrainChunkVisibilityChanged(terrainChunk, isVisible);
+        }
+        
+        private void CreateAndLoadNewTerrainChunkSync(Vector2Int viewedChunkCoord)
+        {
+            TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
+
+            terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
+            newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
+            newChunk.LoadSync();
         }
         
         private bool IsChunkCoordInsideWorld(Vector2 coord)
