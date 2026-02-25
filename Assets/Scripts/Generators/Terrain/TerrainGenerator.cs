@@ -48,7 +48,7 @@ namespace Generators.Terrain
         
         public void Start()
         {
-            loadingScreen.Show();
+            loadingScreen?.Show();
             
             Texture2DArray albedoArray =
                 BiomeAlbedoArrayBuilder.Build(worldSettings.biomes);
@@ -102,7 +102,7 @@ namespace Generators.Terrain
             
             if (initialLoading)
             {
-                loadingScreen.Hide();
+                loadingScreen?.Hide();
                 initialLoading = false;
             }
         }

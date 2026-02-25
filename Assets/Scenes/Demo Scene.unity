@@ -674,6 +674,7 @@ MonoBehaviour:
   layerMask:
     serializedVersion: 2
     m_Bits: 1
+  loadingScreen: {fileID: 0}
 --- !u!4 &1902248400
 Transform:
   m_ObjectHideFlags: 0
