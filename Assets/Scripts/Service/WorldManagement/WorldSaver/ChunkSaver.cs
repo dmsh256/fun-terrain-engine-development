@@ -1,13 +1,13 @@
 using System.IO;
-using Settings;
 using UnityEngine;
 
 namespace Service.WorldManagement.WorldSaver
 {
+    // TODO use actual
     public class ChunkSaver
     {
         private static readonly string saveRoot = Application.dataPath;
-        private static string worldName = WorldManager.Instance.name;
+        private static string worldName = "tmp";
         
         public static void SaveChunk(Chunk chunk)
         {

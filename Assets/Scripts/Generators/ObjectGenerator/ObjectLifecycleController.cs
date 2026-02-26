@@ -137,6 +137,8 @@ namespace Generators.ObjectGenerator
             
             grassManager.Spawn(terrainChunk, biomeProvider);
             objectManager.Spawn(terrainChunk, terrainSpawnData, biomeProvider);
+            
+            terrainChunk.ObjectsSpawned();
         }
         
         private void OnDisable()

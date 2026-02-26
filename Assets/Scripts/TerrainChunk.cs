@@ -14,36 +14,39 @@ public class TerrainChunk
     public event Action<TerrainChunk, bool> onVisibilityChanged;
     
     public Vector2Int coordinates;
+    private readonly Transform viewer;
+    private Vector2 viewerPosition => new(viewer.position.x, viewer.position.z);
+    private readonly Transform parent;
 
     private readonly GameObject meshObject;
-    private readonly Vector2 sampleStartCoordinates;
-    private readonly Bounds bounds;
-
     private readonly MeshFilter meshFilter;
     private readonly MeshCollider meshCollider;
-
+    private readonly MeshSettings meshSettings;
+    
+    private readonly Vector2 sampleStartCoordinates;
+    private readonly Bounds bounds;
+    
     private readonly LODInfo[] detailLevels;
     private readonly LODMesh[] lodMeshes;
     private readonly int colliderLODIndex;
-
-    public TerrainContextMap terrainContextMap;
-    private bool heightMapReceived;
+    
     private int previousLODIndex = -1;
-    private bool hasSetCollider;
+    
     private bool collisionMeshRequested;
     private bool forceCollisionMesh;
     private readonly float maxViewDistance;
-
-    private readonly GlobalHeightMapSettings heightMapSettings;
-    private readonly MeshSettings meshSettings;
-    private readonly Transform viewer;
     
+    private bool heightMapReceived;
     private bool biomeMapReceived;
-    
-    private Vector2 viewerPosition => new(viewer.position.x, viewer.position.z);
-    private readonly List<GameObject> borderObjects = new();
+    private bool hasSetCollider;
+    private bool objectsSpawned;
+
     private readonly WorldSettings worldSettings;
-    private readonly Transform parent;
+    private readonly GlobalHeightMapSettings heightMapSettings;
+    
+    private readonly List<GameObject> borderObjects = new();
+    
+    public TerrainContextMap terrainContextMap;
     public readonly LayerMask terrainLayerMask;
 
     private GameObject waterObject;
@@ -111,53 +114,6 @@ public class TerrainChunk
         ThreadedDataRequester.RequestData(
             () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine,
                 heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnHeightMapReceived);
-    }
-
-    /** initial chunks are loaded synchronously, because we need to place our player on a solid ground */
-    // TODO temp solution, change to something more elegant
-    public void LoadSync()
-    {
-        List<IHeightMapModifier> effectiveModifiers = new();
-        foreach (IHeightMapModifier modifier in worldHeightModifiers)
-        {
-            if (modifier.bounds.Intersects(bounds))
-                effectiveModifiers.Add(modifier);
-        }
-
-        TerrainContextMapGenerator generator = new(worldSettings);
-        terrainContextMap = generator.GenerateTerrainContextMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine, 
-            heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers);
-
-        heightMapReceived = true;
-        biomeMapReceived = true;
-        
-        int lodIndex = 0;
-        LODMesh lodMesh = lodMeshes[lodIndex];
-
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(terrainContextMap.heightMap.values, 
-            terrainContextMap.biomeDensityMap.primary, meshSettings, detailLevels[lodIndex].lod);
-        
-        Mesh mesh = meshData.CreateMesh();
-        meshFilter.mesh = mesh;
-        meshCollider.sharedMesh = mesh;
-        lodMesh.colliderMesh = mesh;
-        lodMesh.hasTerrainMesh = true;
-        previousLODIndex = lodIndex;
-        LODMesh colliderLod = lodMeshes[colliderLODIndex];
-        
-        ColliderMeshData colliderMeshData = ColliderMeshGenerator.GenerateColliderMesh(terrainContextMap.heightMap.values, 
-            meshSettings, detailLevels[colliderLODIndex].lod);
-        
-        Mesh colliderMesh = colliderMeshData.CreateColliderMesh();
-        meshCollider.sharedMesh = colliderMesh;
-        colliderLod.colliderMesh = colliderMesh;
-        colliderLod.hasColliderMesh = true;
-        hasSetCollider = true;
-        
-        CreateWater(worldSettings.waterMaterial);
-
-        SetVisible(true);
-        onVisibilityChanged?.Invoke(this, true);
     }
     
     private void OnHeightMapReceived(object heightMapObject)
@@ -319,7 +275,7 @@ public class TerrainChunk
             yield return WorldBorderSide.Bottom;
     }
     
-    private bool IsChunkCoordInsideWorld(Vector2 chunkCoordinates)
+    private bool IsChunkCoordInsideWorld(Vector2 chunkCoordinates) // TODO Use world manager
     {
         int halfX = worldSettings.worldSizeInChunksX / 2;
         int halfY = worldSettings.worldSizeInChunksY / 2;
@@ -402,6 +358,28 @@ public class TerrainChunk
             borderObjects.Add(border);
         }
     }
+
+    public void ObjectsSpawned()
+    {
+        objectsSpawned = true;
+    }
+    
+    public bool IsReadyForPlayer()
+    {
+        if (!heightMapReceived)
+            return false;
+        
+        if (!biomeMapReceived)
+            return false;
+        
+        if (!objectsSpawned)
+            return false;
+        
+        if (!hasSetCollider)
+            return false;
+        
+        return true;
+    }
 }
 
 internal class LODMesh
@@ -448,19 +426,5 @@ internal class LODMesh
         hasRequestedColliderMesh = true;
         ThreadedDataRequester.RequestData(() => ColliderMeshGenerator.GenerateColliderMesh(heightMap.values, meshSettings, levelOfDetail),
             OnColliderMeshDataReceived);
-    }
-    
-    public void GenerateMeshSync(HeightMap heightMap, int[,] biomeDensityMap, MeshSettings meshSettings)
-    {
-        MeshData meshData = MeshGenerator.GenerateTerrainMesh(heightMap.values, biomeDensityMap, meshSettings, levelOfDetail);
-        colliderMesh = meshData.CreateMesh();
-        hasTerrainMesh = true;
-    }
-    
-    public void GenerateColliderMeshSync(HeightMap heightMap, MeshSettings meshSettings)
-    {
-        ColliderMeshData meshData = ColliderMeshGenerator.GenerateColliderMesh(heightMap.values, meshSettings, levelOfDetail);
-        colliderMesh = meshData.CreateColliderMesh();
-        hasColliderMesh = true;
     }
 }

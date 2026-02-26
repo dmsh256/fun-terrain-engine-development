@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using Managers.Player;
+using Managers.World;
 using Settings;
 using UI.LoadingScreen;
 using UnityEngine;
@@ -15,11 +17,16 @@ namespace Generators.Terrain
         
         public WorldSettings worldSettings;
         
+        private WorldManager worldManager;
+        private readonly PlayerManager playerManager = new();
+        
         public int colliderLODIndex;
         public LODInfo[] detailLevels;
         
         [SerializeField]
         private int collisionMeshLoadRadius = 1;
+
+        private const int bootstrapRadius = 1;
 
         public Transform viewer;
         public Material mapMaterial;
@@ -44,10 +51,13 @@ namespace Generators.Terrain
 
         [SerializeField]
         public LoadingScreen loadingScreen;
-        private bool isInitialLoading = true;
+
+        private readonly List<TerrainChunk> bootstrapChunks = new();
+        private bool waitingForBootstrap = true;
         
         public void Start()
         {
+            worldManager = new WorldManager(worldSettings, meshSettings);
             loadingScreen?.Show();
             
             Texture2DArray albedoArray =
@@ -63,15 +73,37 @@ namespace Generators.Terrain
             objectLifecycleController?.Init(meshSettings, worldSettings);
 
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
-            currentChunkCoord = GetChunkCoord(viewerPosition);
+            currentChunkCoord = worldManager.GetChunkCoord(viewerPosition);
             UpdateOrCreateVisibleChunks();
         }
 
         public void Update()
         {
+            if (waitingForBootstrap)
+            {
+                bool allReady = true;
+                foreach (TerrainChunk chunk in bootstrapChunks)
+                {
+                    if (!chunk.IsReadyForPlayer())
+                    {
+                        allReady = false;
+                        UpdateOrCreateVisibleChunks();
+                        break;
+                    }
+                }
+
+                if (allReady)
+                {
+                    waitingForBootstrap = false;
+                    playerManager.PlacePlayer(viewer, layerMask);
+                    loadingScreen?.Hide();
+                    bootstrapChunks.Clear();
+                }
+            }
+            
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
 
-            Vector2Int newChunkCoord = GetChunkCoord(viewerPosition);
+            Vector2Int newChunkCoord = worldManager.GetChunkCoord(viewerPosition);
             if (newChunkCoord != currentChunkCoord)
             {
                 currentChunkCoord = newChunkCoord;
@@ -103,11 +135,6 @@ namespace Generators.Terrain
 
         private void DoCreateOrUpdateChunks(int currentChunkCoordX, int currentChunkCoordY, HashSet<Vector2> alreadyUpdatedChunkCoords)
         {
-            if (isInitialLoading)
-            {
-                LoadInitialChunksSync();
-            }
-            
             List<Vector2Int> candidateCoords = new();
             for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)
             {
@@ -115,7 +142,7 @@ namespace Generators.Terrain
                 {
                     Vector2Int coord = new(currentChunkCoordX + x, currentChunkCoordY + y);
 
-                    if (!IsChunkCoordInsideWorld(coord))
+                    if (!worldManager.IsChunkCoordInsideWorld(coord))
                         continue;
 
                     if (alreadyUpdatedChunkCoords.Contains(coord))
@@ -125,19 +152,6 @@ namespace Generators.Terrain
                 }
             }
             
-            candidateCoords.Sort((a, b) =>
-            {
-                int dxA = a.x - currentChunkCoordX;
-                int dyA = a.y - currentChunkCoordY;
-                int dxB = b.x - currentChunkCoordX;
-                int dyB = b.y - currentChunkCoordY;
-
-                int distA = dxA * dxA + dyA * dyA;
-                int distB = dxB * dxB + dyB * dyB;
-
-                return distA.CompareTo(distB);
-            });
-            
             foreach (Vector2Int viewedChunkCoord in candidateCoords)
             {
                 if (terrainChunkDictionary.TryGetValue(viewedChunkCoord, out TerrainChunk existingChunk))
@@ -145,44 +159,6 @@ namespace Generators.Terrain
                 else
                     CreateAndLoadNewTerrainChunk(viewedChunkCoord);
             }
-        }
-
-        private void LoadInitialChunksSync()
-        {
-            List<Vector2Int> initialCoords = new()
-            {
-                currentChunkCoord,
-                currentChunkCoord - Vector2Int.right,
-                currentChunkCoord - Vector2Int.up,
-                currentChunkCoord - Vector2Int.one
-            };
-
-            foreach (Vector2Int initialCoord in initialCoords)
-            {
-                CreateAndLoadNewTerrainChunkSync(initialCoord);
-            }
-
-            PlacePlayer();
-                
-            loadingScreen?.Hide();
-            isInitialLoading = false;
-        }
-
-        private void PlacePlayer()
-        {
-            Rigidbody rigidBody = viewer.GetComponentInParent<Rigidbody>();
-            Collider collider = rigidBody.GetComponent<Collider>();
-            collider.enabled = false;
-
-            Ray ray = new (viewer.position + Vector3.up * 100f, Vector3.down);
-            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, layerMask))
-            {
-                rigidBody.MovePosition(
-                    new Vector3(rigidBody.position.x, hit.point.y + 1.5f, rigidBody.position.z)
-                );
-            }
-            
-            collider.enabled = true;
         }
         
         private void CreateAndLoadNewTerrainChunk(Vector2Int viewedChunkCoord)
@@ -192,6 +168,11 @@ namespace Generators.Terrain
             terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
             newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
             newChunk.LoadAsync();
+            
+            if (waitingForBootstrap && IsWithinBootstrapRadius(viewedChunkCoord))
+            {
+                bootstrapChunks.Add(newChunk);
+            }
         }
         
         private void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool isVisible)
@@ -204,21 +185,10 @@ namespace Generators.Terrain
             objectLifecycleController?.OnTerrainChunkVisibilityChanged(terrainChunk, isVisible);
         }
         
-        private void CreateAndLoadNewTerrainChunkSync(Vector2Int viewedChunkCoord)
+        private bool IsWithinBootstrapRadius(Vector2Int coord)
         {
-            TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
-
-            terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
-            newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
-            newChunk.LoadSync();
-        }
-        
-        private bool IsChunkCoordInsideWorld(Vector2 coord)
-        {
-            int halfX = worldSettings.worldSizeInChunksX / 2;
-            int halfY = worldSettings.worldSizeInChunksY / 2;
-
-            return coord.x >= -halfX && coord.x < halfX && coord.y >= -halfY && coord.y < halfY;
+            return Mathf.Abs(coord.x - currentChunkCoord.x) <= bootstrapRadius &&
+                   Mathf.Abs(coord.y - currentChunkCoord.y) <= bootstrapRadius;
         }
 
         private void UpdateCollisionChunks(int currentChunkCoordX, int currentChunkCoordY)
@@ -228,7 +198,7 @@ namespace Generators.Terrain
                 for (int x = -collisionMeshLoadRadius; x <= collisionMeshLoadRadius; x++)
                 {
                     Vector2Int collisionChunkCoord = new(currentChunkCoordX + x, currentChunkCoordY + y);
-                    if (!IsChunkCoordInsideWorld(collisionChunkCoord))
+                    if (!worldManager.IsChunkCoordInsideWorld(collisionChunkCoord))
                         continue;
 
                     if (terrainChunkDictionary.TryGetValue(collisionChunkCoord, out TerrainChunk terrainChunk))
@@ -247,13 +217,6 @@ namespace Generators.Terrain
         private void Awake()
         {
             WorldContext.Initialize(worldSettings);
-        }
-        
-        private Vector2Int GetChunkCoord(Vector2 position)
-        {
-            int x = Mathf.RoundToInt(position.x / meshWorldSize);
-            int y = Mathf.RoundToInt(position.y / meshWorldSize);
-            return new Vector2Int(x, y);
         }
     }
 
