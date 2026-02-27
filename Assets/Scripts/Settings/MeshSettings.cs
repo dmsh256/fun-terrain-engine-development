@@ -24,8 +24,8 @@ namespace Settings
 		public int flatShadedChunkSizeIndex;
 	
 		// num verts per line of mesh rendered at LOD = 0. Includes the 2 extra verts that are excluded from final mesh, but used for calculating normals
-		public int numVertsPerLine => supportedChunkSizes [useFlatShading ? flatShadedChunkSizeIndex : chunkSizeIndex] + numOfExtraVertices + numOfOutOfMeshVertices;
+		public int numVerticesPerLine => supportedChunkSizes [useFlatShading ? flatShadedChunkSizeIndex : chunkSizeIndex] + numOfExtraVertices + numOfOutOfMeshVertices;
 
-		public int meshWorldSize => (numVertsPerLine - numOfExtraVertices) * meshScale;
+		public int meshWorldSize => (numVerticesPerLine - numOfExtraVertices) * meshScale;
 	}
 }

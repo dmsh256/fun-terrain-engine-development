@@ -8,65 +8,65 @@ namespace Generators.MeshGenerator
         public static MeshData GenerateTerrainMesh(float[,] heightMap, int[,] biomeMap, MeshSettings meshSettings, int levelOfDetail)
         {
             int skipIncrement = levelOfDetail == 0 ? 1 : levelOfDetail * 2;
-            int numVertsPerLine = meshSettings.numVertsPerLine;
+            int numVerticesPerLine = meshSettings.numVerticesPerLine;
 
-            Vector2 topLeft = new (0, 0);
+            Vector2 bottomLeft = new (0, 0);
 
-            MeshData meshData = new (numVertsPerLine, skipIncrement, meshSettings.useFlatShading);
+            MeshData meshData = new (numVerticesPerLine, skipIncrement, meshSettings.useFlatShading);
 
-            int[] vertexIndicesMap = new int[numVertsPerLine * numVertsPerLine];
+            int[] vertexIndicesMap = new int[numVerticesPerLine * numVerticesPerLine];
             int meshVertexIndex = 0;
             int outOfMeshVertexIndex = -1;
 
-            int numVertsPerLine1 = numVertsPerLine - 1;
-            int numVertsPerLine2 = numVertsPerLine - 2;
-            int numVertsPerLine3 = numVertsPerLine - 3;
-            float invSize = 1f / (numVertsPerLine - 3);
+            int numVerticesPerLine1 = numVerticesPerLine - 1;
+            int numVerticesPerLine2 = numVerticesPerLine - 2;
+            int numVerticesPerLine3 = numVerticesPerLine - 3;
+            float invSize = 1f / (numVerticesPerLine - 3);
             
-            for (int y = 0; y < numVertsPerLine; y++)
+            for (int y = 0; y < numVerticesPerLine; y++)
             {
-                for (int x = 0; x < numVertsPerLine; x++)
+                for (int x = 0; x < numVerticesPerLine; x++)
                 {
-                    bool isOutOfMeshVertex = y == 0 || y == numVertsPerLine1 || x == 0 || x == numVertsPerLine1;
-                    bool isSkippedVertex = x > 2 && x < numVertsPerLine3 && y > 2 && y < numVertsPerLine3 &&
+                    bool isOutOfMeshVertex = y == 0 || y == numVerticesPerLine1 || x == 0 || x == numVerticesPerLine1;
+                    bool isSkippedVertex = x > 2 && x < numVerticesPerLine3 && y > 2 && y < numVerticesPerLine3 &&
                                            ((x - 2) % skipIncrement != 0 || (y - 2) % skipIncrement != 0);
                     if (isOutOfMeshVertex)
                     {
-                        vertexIndicesMap[y * numVertsPerLine + x] = outOfMeshVertexIndex;
+                        vertexIndicesMap[y * numVerticesPerLine + x] = outOfMeshVertexIndex;
                         outOfMeshVertexIndex--;
                     }
                     else if (!isSkippedVertex)
                     {
-                        vertexIndicesMap[y * numVertsPerLine + x] = meshVertexIndex;
+                        vertexIndicesMap[y * numVerticesPerLine + x] = meshVertexIndex;
                         meshVertexIndex++;
                     }
                 }
             }
             
-            for (int y = 0; y < numVertsPerLine; y++)
+            for (int y = 0; y < numVerticesPerLine; y++)
             {
-                for (int x = 0; x < numVertsPerLine; x++)
+                for (int x = 0; x < numVerticesPerLine; x++)
                 {
-                    bool isSkippedVertex = x > 2 && x < numVertsPerLine3 && y > 2 && y < numVertsPerLine3 &&
+                    bool isSkippedVertex = x > 2 && x < numVerticesPerLine3 && y > 2 && y < numVerticesPerLine3 &&
                                            ((x - 2) % skipIncrement != 0 || (y - 2) % skipIncrement != 0);
 
                     if (isSkippedVertex) 
                         continue;
                 
-                    bool isOutOfMeshVertex = y == 0 || y == numVertsPerLine1 || x == 0 || x == numVertsPerLine1;
+                    bool isOutOfMeshVertex = y == 0 || y == numVerticesPerLine1 || x == 0 || x == numVerticesPerLine1;
                     bool isMeshEdgeVertex =
-                        (y == 1 || y == numVertsPerLine2 || x == 1 || x == numVertsPerLine2) &&
+                        (y == 1 || y == numVerticesPerLine2 || x == 1 || x == numVerticesPerLine2) &&
                         !isOutOfMeshVertex;
                     bool isMainVertex = (x - 2) % skipIncrement == 0 && (y - 2) % skipIncrement == 0 &&
                                         !isOutOfMeshVertex && !isMeshEdgeVertex;
                     bool isEdgeConnectionVertex =
-                        (y == 2 || y == numVertsPerLine3 || x == 2 || x == numVertsPerLine3) &&
+                        (y == 2 || y == numVerticesPerLine3 || x == 2 || x == numVerticesPerLine3) &&
                         !isOutOfMeshVertex && !isMeshEdgeVertex && !isMainVertex;
 
-                    int vertexIndex = vertexIndicesMap[y * numVertsPerLine + x];
+                    int vertexIndex = vertexIndicesMap[y * numVerticesPerLine + x];
                     Vector2 percent = new ((x - 1) * invSize, (y - 1) * invSize);
                     Vector2 vertexPosition2D =
-                        topLeft + new Vector2(percent.x, percent.y) * meshSettings.meshWorldSize;
+                        bottomLeft + new Vector2(percent.x, percent.y) * meshSettings.meshWorldSize;
                     
                     float height = heightMap[x, y];
                     int biomeId = biomeMap[x, y];
@@ -75,7 +75,7 @@ namespace Generators.MeshGenerator
                     
                     if (isEdgeConnectionVertex)
                     {
-                        bool isVertical = x == 2 || x == numVertsPerLine3;
+                        bool isVertical = x == 2 || x == numVerticesPerLine3;
                         int dstToMainVertexA = (isVertical ? y - 2 : x - 2) % skipIncrement;
                         int dstToMainVertexB = skipIncrement - dstToMainVertexA;
                         float dstPercentFromAToB = dstToMainVertexA / (float)skipIncrement;
@@ -91,17 +91,17 @@ namespace Generators.MeshGenerator
                     meshData.AddVertex(new Vector3(vertexPosition2D.x, height, vertexPosition2D.y), percent,
                         vertexIndex);
                     
-                    bool createTriangle = x < numVertsPerLine1 && y < numVertsPerLine1 &&
+                    bool createTriangle = x < numVerticesPerLine1 && y < numVerticesPerLine1 &&
                                           (!isEdgeConnectionVertex || (x != 2 && y != 2));
 
                     if (createTriangle)
                     {
-                        int currentIncrement = isMainVertex && x != numVertsPerLine3 && y != numVertsPerLine3
+                        int currentIncrement = isMainVertex && x != numVerticesPerLine3 && y != numVerticesPerLine3
                             ? skipIncrement
                             : 1;
 
-                        int row = y * numVertsPerLine;
-                        int nextRow = (y + currentIncrement) * numVertsPerLine;
+                        int row = y * numVerticesPerLine;
+                        int nextRow = (y + currentIncrement) * numVerticesPerLine;
                         int a = vertexIndicesMap[row + x];
                         int b = vertexIndicesMap[row + x + currentIncrement];
                         int c = vertexIndicesMap[nextRow + x];

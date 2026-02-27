@@ -109,7 +109,7 @@ public class TerrainChunk
         }
         
         ThreadedDataRequester.RequestData(
-            () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVertsPerLine, meshSettings.numVertsPerLine,
+            () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
                 heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnHeightMapReceived);
     }
     
@@ -200,7 +200,7 @@ public class TerrainChunk
                     continue;
 
                 float dominance = biomeMap.dominance[x, y];
-                float lineScale = 40f;
+                float lineScale = 5f;
                 Vector3 end = start + Vector3.up * dominance * lineScale;
 
                 drawLine(start, end, worldSettings.biomes[primary].debugColor);

@@ -8,7 +8,7 @@ namespace Generators.MeshGenerator
         public static ColliderMeshData GenerateColliderMesh(float[,] heightMap, MeshSettings meshSettings, int levelOfDetail)
         {
             int skipIncrement = levelOfDetail == 0 ? 1 : levelOfDetail * 2;
-            int numVertsPerLine = meshSettings.numVertsPerLine;
+            int numVertsPerLine = meshSettings.numVerticesPerLine;
 
             Vector2 topLeft = new(0, 0);
 

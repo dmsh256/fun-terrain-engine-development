@@ -59,7 +59,9 @@ namespace Generators.BiomeMap
                     
                     biomeDensityMap.primary[x, y] = bestBiome;
                     biomeDensityMap.secondary[x, y] = secondBiome;
-                    biomeDensityMap.dominance[x, y] = highestDensity - secondDensity;
+                    
+                    float sum = highestDensity + secondDensity;
+                    biomeDensityMap.dominance[x, y] = sum > 0f ? highestDensity / sum : 1f;
                 }
             }
 
