@@ -23,7 +23,7 @@ namespace Utils.Preview.BiomeMapTextureGenerator
         public BiomeData[] biomes;
         
         [Header("HeightMap Settings")]
-        public GlobalHeightMapSettings heightMapSettings;
+        public HeightMapSettings heightMapSettings;
         
         public MeshSettings meshSettings;
         

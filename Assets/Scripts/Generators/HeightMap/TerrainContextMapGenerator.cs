@@ -25,7 +25,7 @@ namespace Generators.HeightMap
             biomeGenerator = BiomeGeneratorFactory.GetBiomeMapGenerator(worldSettings);
         }
         
-        public TerrainContextMap GenerateTerrainContextMap(int width, int length, GlobalHeightMapSettings settings, Vector2 sampleCentre, BiomeData[] biomes, List<IHeightMapModifier> heightModifiers = null)
+        public TerrainContextMap GenerateTerrainContextMap(int width, int length, HeightMapSettings settings, Vector2 sampleCentre, BiomeData[] biomes, List<IHeightMapModifier> heightModifiers = null)
         {
             float[,] structuralHeight = structuralHeightMapGenerator.GenerateStructuralHeightMap(width, length, settings, sampleCentre);
 

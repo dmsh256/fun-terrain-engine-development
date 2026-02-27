@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Generators.WorldBorders;
 using Managers.Player;
 using Managers.World;
 using Settings;
@@ -33,7 +34,7 @@ namespace Generators.Terrain
         public Material terrainMaterial;
 
         public MeshSettings meshSettings; 
-        public GlobalHeightMapSettings heightMapSettings;
+        public HeightMapSettings heightMapSettings;
         
         public ObjectGenerator.ObjectLifecycleController objectLifecycleController;
         
@@ -55,6 +56,8 @@ namespace Generators.Terrain
         private readonly List<TerrainChunk> bootstrapChunks = new();
         private bool waitingForBootstrap = true;
         
+        private WorldBorderGenerator worldBorderGenerator;
+        
         public void Start()
         {
             worldManager = new WorldManager(worldSettings, meshSettings);
@@ -75,6 +78,9 @@ namespace Generators.Terrain
             viewerPosition = new Vector2(viewer.position.x, viewer.position.z);
             currentChunkCoord = worldManager.GetChunkCoord(viewerPosition);
             UpdateOrCreateVisibleChunks();
+
+            worldBorderGenerator = new WorldBorderGenerator(worldSettings, meshSettings, heightMapSettings);
+            worldBorderGenerator.CreateWorldBorders();
         }
 
         public void Update()

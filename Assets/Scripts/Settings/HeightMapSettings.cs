@@ -4,8 +4,8 @@ using UnityEngine;
 
 namespace Settings
 {
-    [CreateAssetMenu(menuName = "World/Global Height Settings")]
-    public class GlobalHeightMapSettings : ScriptableObject
+    [CreateAssetMenu(menuName = "World/Height Settings")]
+    public class HeightMapSettings : ScriptableObject
     {
         [Header("Noise Layers")]
         public List<NoiseLayer> layers = new();

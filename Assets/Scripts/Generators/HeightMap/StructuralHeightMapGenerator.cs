@@ -14,7 +14,7 @@ namespace Generators.HeightMap
     {
         private readonly List<(INoiseSource source, NoiseLayer layer)> noiseSources = new();
 
-        public float[,] GenerateStructuralHeightMap(int width, int length, GlobalHeightMapSettings heightMapSettings, Vector2 sampleCentre)
+        public float[,] GenerateStructuralHeightMap(int width, int length, HeightMapSettings heightMapSettings, Vector2 sampleCentre)
         {
             if (heightMapSettings.layers == null || heightMapSettings.layers.Count == 0)
                 throw new Exception("No noise layers defined.");

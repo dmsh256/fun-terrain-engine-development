@@ -7,16 +7,16 @@ using Generators.Terrain;
 using Settings;
 using UnityEngine;
 using WorldGeneration.Biomes;
-using WorldGeneration.Borders;
+using Object = UnityEngine.Object;
 
 public class TerrainChunk
 {
+    private static readonly int WaterHeight = Shader.PropertyToID("_WaterHeight");
     public event Action<TerrainChunk, bool> onVisibilityChanged;
     
     public Vector2Int coordinates;
     private readonly Transform viewer;
     private Vector2 viewerPosition => new(viewer.position.x, viewer.position.z);
-    private readonly Transform parent;
 
     private readonly GameObject meshObject;
     private readonly MeshFilter meshFilter;
@@ -42,9 +42,7 @@ public class TerrainChunk
     private bool objectsSpawned;
 
     private readonly WorldSettings worldSettings;
-    private readonly GlobalHeightMapSettings heightMapSettings;
-    
-    private readonly List<GameObject> borderObjects = new();
+    private readonly HeightMapSettings heightMapSettings;
     
     public TerrainContextMap terrainContextMap;
     public readonly LayerMask terrainLayerMask;
@@ -53,7 +51,7 @@ public class TerrainChunk
     private readonly List<IHeightMapModifier> worldHeightModifiers = new();
     private readonly Vector2 chunkWorldPosition;
     
-    public TerrainChunk(Vector2Int coordinates, WorldSettings worldSettings, GlobalHeightMapSettings heightMapSettings, MeshSettings meshSettings,
+    public TerrainChunk(Vector2Int coordinates, WorldSettings worldSettings, HeightMapSettings heightMapSettings, MeshSettings meshSettings,
         LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, LayerMask terrainLayerMask)
     {
         this.coordinates = coordinates;
@@ -63,7 +61,6 @@ public class TerrainChunk
         this.meshSettings = meshSettings;
         this.viewer = viewer;
         this.worldSettings = worldSettings;
-        this.parent = parent;
         this.terrainLayerMask = terrainLayerMask;
         
         sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * meshSettings.meshWorldSize;
@@ -125,7 +122,6 @@ public class TerrainChunk
         UpdateTerrainChunk();
         TryUpdateCollisionMesh();
         
-        //CreateBorders(worldSettings.borderMaterial);
         CreateWater(worldSettings.waterMaterial);
     }
     
@@ -260,27 +256,26 @@ public class TerrainChunk
         return meshObject.activeSelf;
     }
     
-    private IEnumerable<WorldBorderSide> GetBorderSides()
+    public void ObjectsSpawned()
     {
-        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.left))
-            yield return WorldBorderSide.Left;
-
-        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.right))
-            yield return WorldBorderSide.Right;
-
-        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.up))
-            yield return WorldBorderSide.Top;
-
-        if (!IsChunkCoordInsideWorld(coordinates + Vector2Int.down))
-            yield return WorldBorderSide.Bottom;
+        objectsSpawned = true;
     }
     
-    private bool IsChunkCoordInsideWorld(Vector2 chunkCoordinates) // TODO Use world manager
+    public bool IsReadyForPlayer()
     {
-        int halfX = worldSettings.worldSizeInChunksX / 2;
-        int halfY = worldSettings.worldSizeInChunksY / 2;
-
-        return chunkCoordinates.x >= -halfX && chunkCoordinates.x < halfX && chunkCoordinates.y >= -halfY && chunkCoordinates.y < halfY;
+        if (!heightMapReceived)
+            return false;
+        
+        if (!biomeMapReceived)
+            return false;
+        
+        if (!objectsSpawned)
+            return false;
+        
+        if (!hasSetCollider)
+            return false;
+        
+        return true;
     }
 
     private void CreateWater(Material material)
@@ -305,80 +300,10 @@ public class TerrainChunk
         MeshRenderer renderer = waterObject.GetComponent<MeshRenderer>();
         renderer.material = material;
 
-        if (renderer.material.HasProperty("_WaterHeight"))
-            renderer.material.SetFloat("_WaterHeight", waterLevel);
+        if (renderer.material.HasProperty(WaterHeight))
+            renderer.material.SetFloat(WaterHeight, waterLevel);
 
-        GameObject.Destroy(waterObject.GetComponent<Collider>());
-    }
-    
-    private void CreateBorders(Material borderMaterial) // TODO fix this method (chunk center is now a real center, not bottom left)
-    {
-        foreach (WorldBorderSide side in GetBorderSides())
-        {
-            GameObject border = GameObject.CreatePrimitive(PrimitiveType.Quad);
-            border.name = $"WorldBorder_{side}";
-            border.transform.SetParent(parent, false);
-
-            border.GetComponent<MeshRenderer>().material = borderMaterial;
-            
-            Vector3 position = chunkWorldPosition;
-            Quaternion rotation = Quaternion.identity;
-
-            float half = meshSettings.meshWorldSize * 0.5f;
-            const float outwardOffset = 0.05f;
-            float height = terrainContextMap.heightMap.minValue * terrainContextMap.heightMap.heightMultiplier;
-
-            switch (side)
-            {
-                case WorldBorderSide.Right:
-                    position += new Vector3(meshSettings.meshWorldSize + outwardOffset, height, half);
-                    rotation = Quaternion.Euler(0, 90, 0);
-                    break;
-
-                case WorldBorderSide.Left:
-                    position += new Vector3(-outwardOffset, height, half);
-                    rotation = Quaternion.Euler(0, -90, 0);
-                    break;
-
-                case WorldBorderSide.Top:
-                    position += new Vector3(half, height, meshSettings.meshWorldSize + outwardOffset);
-                    rotation = Quaternion.identity;
-                    break;
-
-                case WorldBorderSide.Bottom:
-                    position += new Vector3(half, height, -outwardOffset);
-                    rotation = Quaternion.Euler(0, 180, 0);
-                    break;
-            }
-
-            border.transform.position = position;
-            border.transform.rotation = rotation;
-            border.transform.localScale = new Vector3(meshSettings.meshWorldSize, terrainContextMap.heightMap.maxValue * terrainContextMap.heightMap.heightMultiplier, 2);
-
-            borderObjects.Add(border);
-        }
-    }
-
-    public void ObjectsSpawned()
-    {
-        objectsSpawned = true;
-    }
-    
-    public bool IsReadyForPlayer()
-    {
-        if (!heightMapReceived)
-            return false;
-        
-        if (!biomeMapReceived)
-            return false;
-        
-        if (!objectsSpawned)
-            return false;
-        
-        if (!hasSetCollider)
-            return false;
-        
-        return true;
+        Object.Destroy(waterObject.GetComponent<Collider>());
     }
 }
 

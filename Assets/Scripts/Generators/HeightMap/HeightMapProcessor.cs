@@ -13,7 +13,7 @@ namespace Generators.HeightMap
         
         private List<IHeightMapModifier> heightModifiers;
         
-        public TerrainContextMap ProcessHeight(float[,] values, GlobalHeightMapSettings settings, Vector2 sampleCentre, BiomeDensityMap biomeMap, BiomeData[] biomes)
+        public TerrainContextMap ProcessHeight(float[,] values, HeightMapSettings settings, Vector2 sampleCentre, BiomeDensityMap biomeMap, BiomeData[] biomes)
         {
             int width = values.GetLength(0);
             int length = values.GetLength(1);
