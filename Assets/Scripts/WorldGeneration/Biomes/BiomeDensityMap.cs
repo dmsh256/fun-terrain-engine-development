@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace WorldGeneration.Biomes
 {
     public class BiomeDensityMap
@@ -9,5 +11,7 @@ namespace WorldGeneration.Biomes
         public int[,] secondary;
 
         public float[,] dominance;
+        
+        public Color[][] splatMap;
     }
 }

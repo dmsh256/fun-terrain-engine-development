@@ -12,6 +12,7 @@ using Object = UnityEngine.Object;
 public class TerrainChunk
 {
     private static readonly int WaterHeight = Shader.PropertyToID("_WaterHeight");
+    private static readonly int BiomeCount = Shader.PropertyToID("_BiomeCount");
     public event Action<TerrainChunk, bool> onVisibilityChanged;
     
     public Vector2Int coordinates;
@@ -51,6 +52,9 @@ public class TerrainChunk
     private readonly List<IHeightMapModifier> worldHeightModifiers = new();
     private readonly Vector2 chunkWorldPosition;
     
+    private Texture2D splatMap;
+    private readonly Material runtimeMaterial;
+    
     public TerrainChunk(Vector2Int coordinates, WorldSettings worldSettings, HeightMapSettings heightMapSettings, MeshSettings meshSettings,
         LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, LayerMask terrainLayerMask)
     {
@@ -78,7 +82,8 @@ public class TerrainChunk
         MeshRenderer meshRenderer = meshObject.AddComponent<MeshRenderer>();
         meshFilter = meshObject.AddComponent<MeshFilter>();
         meshCollider = meshObject.AddComponent<MeshCollider>();
-        meshRenderer.material = material;
+        runtimeMaterial = new Material(material);
+        meshRenderer.material = runtimeMaterial;
 
         meshObject.transform.position = new Vector3(chunkWorldPosition.x, 0f, chunkWorldPosition.y);
         meshObject.transform.parent = parent;
@@ -110,19 +115,40 @@ public class TerrainChunk
         
         ThreadedDataRequester.RequestData(
             () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
-                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnHeightMapReceived);
+                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnTerrainContextReceived);
     }
     
-    private void OnHeightMapReceived(object heightMapObject)
+    private void OnTerrainContextReceived(object terrainContextObject)
     {
-        terrainContextMap = (TerrainContextMap)heightMapObject;
+        terrainContextMap = (TerrainContextMap)terrainContextObject;
         heightMapReceived = true;
         biomeMapReceived = true;
+        
+        GenerateSplatOnMainThread();
         
         UpdateTerrainChunk();
         TryUpdateCollisionMesh();
         
         CreateWater(worldSettings.waterMaterial);
+    }
+    
+    private void GenerateSplatOnMainThread()
+    {
+        int resolution = meshSettings.numVerticesPerLine - 2;
+        
+        for (int i = 0; i < terrainContextMap.biomeDensityMap.splatMap.Length; i++)
+        {
+            Texture2D texture2D = new (resolution, resolution, TextureFormat.RGBA32, false, true);
+            texture2D.wrapMode = TextureWrapMode.Clamp;
+            texture2D.filterMode = FilterMode.Bilinear;
+
+            texture2D.SetPixels(terrainContextMap.biomeDensityMap.splatMap[i]);
+            texture2D.Apply();
+            
+            runtimeMaterial.SetTexture("_SplatMap" + i, texture2D);
+        }
+        
+        runtimeMaterial.SetInt(BiomeCount, worldSettings.biomes.Length);
     }
     
     public void UpdateTerrainChunk()
