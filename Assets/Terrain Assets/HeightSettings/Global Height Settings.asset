@@ -34,9 +34,9 @@ MonoBehaviour:
     maskSmoothRange: {x: 0.25, y: 0.75}
     blendMode: 0
     invertInput: 0
-  - settings: {fileID: 11400000, guid: 8d9769c2757e0cb4b91603c0a37e8f7a, type: 2}
-    enabled: 0
-    weight: 1
+  - settings: {fileID: 11400000, guid: 6f3a2ff93b7891942b33461ce45c71c2, type: 2}
+    enabled: 1
+    weight: 0.5
     useAsMask: 0
     maskSmoothRange: {x: 0.25, y: 0.75}
     blendMode: 1

@@ -16,8 +16,8 @@ MonoBehaviour:
   seed: 95
   useRandomSeed: 0
   worldName: Stolen Sun
-  worldSizeInChunksX: 3
-  worldSizeInChunksY: 3
+  worldSizeInChunksX: 8
+  worldSizeInChunksY: 8
   borderMaterial: {fileID: 2100000, guid: d94e2146348e95e41a3afee7d025b689, type: 2}
   waterMaterial: {fileID: 2100000, guid: 1254d6fb20454904c9950beea3c9f179, type: 2}
   biomes:

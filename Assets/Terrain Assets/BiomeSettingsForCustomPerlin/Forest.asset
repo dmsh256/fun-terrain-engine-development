@@ -29,11 +29,11 @@ MonoBehaviour:
     yOffset: -0.5
     scaleMin: 1
     scaleMax: 6
-  - prefab: {fileID: 919132149155446097, guid: f2c2e4665b0f4ad4aa8384f66e4c065a, type: 3}
-    density: 0.148
+  - prefab: {fileID: 490912221797097854, guid: 183ccee0aab97cb4697a6a9db5939871, type: 3}
+    density: 0.611
     yOffset: -0.5
-    scaleMin: 4
-    scaleMax: 8.3
+    scaleMin: 0.5
+    scaleMax: 1
   hasRocks: 1
   rocks:
   - prefab: {fileID: 5389395240314065769, guid: 967b6a4dedfb5424f8c3a056595dab0e,
@@ -65,7 +65,7 @@ MonoBehaviour:
     scaleMin: 1
     scaleMax: 1.4
   hasGrass: 1
-  grassDensity: 0.3
+  grassDensity: 0.1
   grassVariants:
   - mesh: {fileID: 1124555064963196659, guid: 97b144e985146e0428ac9008c63be54a, type: 3}
     material: {fileID: 2100000, guid: dba447ae7b6f35449930058731119a94, type: 2}
@@ -74,6 +74,6 @@ MonoBehaviour:
     yOffset: 0
   - mesh: {fileID: -8302102485596996044, guid: a4ca1b73d9c584846bba71adeb330c7c, type: 3}
     material: {fileID: 2100000, guid: 4b043753b6e14de40b5307322dceb86f, type: 2}
-    weight: 50
+    weight: 90
     scale: 1
     yOffset: 0
