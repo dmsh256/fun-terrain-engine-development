@@ -28,7 +28,7 @@ namespace Generators.BiomeMap
             for (int i = 0; i < splatCount; i++)
                 biomeDensityMap.splatMap[i] = new Color[splatResolution * splatResolution];
 
-            System.Random rng = new(WorldContext.Seed);
+            System.Random rng = new(WorldContextSettings.Seed);
 
             float[] offsetX = new float[biomes.Length];
             float[] offsetY = new float[biomes.Length];
@@ -44,21 +44,21 @@ namespace Generators.BiomeMap
             {
                 for (int x = 0; x < height; x++)
                 {
-                    float fx = x + sampleCentre.x;
-                    float fy = y + sampleCentre.y;
+                    float worldX = x * worldSettings.worldStep + sampleCentre.x;
+                    float worldY = y * worldSettings.worldStep + sampleCentre.y;
                     
                     float warpX =
-                        Noise(fx * WorldBiomeGenSettings.biomeWarpFrequency + 1000f,
-                              fy * WorldBiomeGenSettings.biomeWarpFrequency + 1000f)
+                        Noise(worldX * WorldBiomeGenSettings.biomeWarpFrequency + 1000f,
+                              worldY * WorldBiomeGenSettings.biomeWarpFrequency + 1000f)
                         * WorldBiomeGenSettings.biomeWarpStrength;
 
                     float warpY =
-                        Noise(fx * WorldBiomeGenSettings.biomeWarpFrequency + 2000f,
-                              fy * WorldBiomeGenSettings.biomeWarpFrequency + 2000f)
+                        Noise(worldX * WorldBiomeGenSettings.biomeWarpFrequency + 2000f,
+                              worldY * WorldBiomeGenSettings.biomeWarpFrequency + 2000f)
                         * WorldBiomeGenSettings.biomeWarpStrength;
 
-                    float wx = fx + warpX;
-                    float wy = fy + warpY;
+                    float wx = worldX + warpX;
+                    float wy = worldY + warpY;
 
                     float heightValue = heightMap[x, y];
 

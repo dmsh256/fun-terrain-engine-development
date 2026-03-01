@@ -222,7 +222,7 @@ namespace Generators.Terrain
         
         private void Awake()
         {
-            WorldContext.Initialize(worldSettings);
+            WorldContextSettings.Initialize(worldSettings);
         }
     }
 

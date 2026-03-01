@@ -67,7 +67,7 @@ public class TerrainChunk
         this.worldSettings = worldSettings;
         this.terrainLayerMask = terrainLayerMask;
         
-        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * meshSettings.meshWorldSize;
+        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * (meshSettings.meshWorldSize * worldSettings.worldStep);
         
         chunkWorldPosition = coordinates * meshSettings.meshWorldSize;
         Vector3 chunkCenter = new (

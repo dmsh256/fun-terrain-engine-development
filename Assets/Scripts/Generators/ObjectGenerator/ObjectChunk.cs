@@ -14,7 +14,7 @@ namespace Generators.ObjectGenerator
         private readonly List<INatureObjectSpawner> spawners = new();
         private readonly List<GameObject> spawnedObjects = new();
         private readonly List<IEnumerator<GameObject>> activeSpawnJobs = new();
-        private readonly System.Random random = new(WorldContext.Seed);
+        private readonly System.Random random = new(WorldContextSettings.Seed);
 
         public ObjectChunk(TerrainSpawnData terrainSpawnData, Transform parent, IBiomeProvider biomeProvider)
         {

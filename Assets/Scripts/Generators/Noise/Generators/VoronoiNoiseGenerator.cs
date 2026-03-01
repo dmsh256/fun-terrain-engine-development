@@ -25,7 +25,7 @@ namespace Generators.Noise.Generators
             }
         }
 
-        public static float[,] GenerateNoiseMap(int width, int height, NoiseSettings noiseSettings, Vector2 sampleCentre)
+        public static float[,] GenerateNoiseMap(int width, int height, NoiseSettings noiseSettings, Vector2 sampleCentre, float worldStep)
         {
             float[,] map = new float[width, height];
             float precomputedCellSize = 1f / noiseSettings.scale;
@@ -34,9 +34,8 @@ namespace Generators.Noise.Generators
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float worldX = sampleCentre.x + x + noiseSettings.offset.x;
-                    float worldZ = sampleCentre.y + y + noiseSettings.offset.y; 
-                    // TODO experiment with this, the world must be generated from x->infinity, y->infinity
+                    float worldX = sampleCentre.x + x * worldStep + noiseSettings.offset.x;
+                    float worldZ = sampleCentre.y + y * worldStep + noiseSettings.offset.y; 
                     
                     int cellX = Mathf.FloorToInt(worldX * precomputedCellSize);
                     int cellY = Mathf.FloorToInt(worldZ * precomputedCellSize);
@@ -50,7 +49,7 @@ namespace Generators.Noise.Generators
                             int nx = cellX + dx;
                             int ny = cellY + dy;
 
-                            Vector2 featureOffset = Hash2(nx, ny, WorldContext.Seed) * noiseSettings.scale;
+                            Vector2 featureOffset = Hash2(nx, ny, WorldContextSettings.Seed) * noiseSettings.scale;
 
                             float featureX = nx * noiseSettings.scale + featureOffset.x;
                             float featureZ = ny * noiseSettings.scale + featureOffset.y;

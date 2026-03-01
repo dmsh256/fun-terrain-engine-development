@@ -5,17 +5,17 @@ namespace Generators.Noise.NoiseSource
 {
     public sealed class SimplexNoiseSource : INoiseSource
     {
-        private readonly NoiseSettings settings;
+        private readonly NoiseSettings noiseSettings;
 
-        public SimplexNoiseSource(NoiseSettings settings)
+        public SimplexNoiseSource(NoiseSettings noiseSettings)
         {
-            this.settings = settings;
+            this.noiseSettings = noiseSettings;
         }
 
-        public float[,] Generate(int width, int height, Vector2 sampleCentre)
+        public float[,] Generate(int width, int height, Vector2 sampleCentre, float worldStep)
         {
             return SimplexNoiseGenerator.GenerateNoiseMap(
-                width, height, settings, sampleCentre
+                width, height, noiseSettings, sampleCentre, worldStep
             );
         }
     }

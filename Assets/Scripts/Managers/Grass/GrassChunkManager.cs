@@ -41,7 +41,7 @@ namespace Managers.Grass
                 terrainSpawnData,
                 biomeProvider,
                 new JitteredGridDistribution(), // TODO inject from somewhere
-                WorldContext.Seed,
+                WorldContextSettings.Seed,
                 fallbackMesh: fallbackMesh,
                 fallbackMaterial: fallbackMaterial);
 

@@ -25,7 +25,7 @@ namespace Generators.BiomeMap
             int mapLength = heightMap.GetLength(0);
             int mapWidth = heightMap.GetLength(1);
 
-            System.Random rng = new(WorldContext.Seed);
+            System.Random rng = new(WorldContextSettings.Seed);
 
             float[] offsetX = new float[biomes.Length];
             float[] offsetY = new float[biomes.Length];
