@@ -218,7 +218,7 @@ public class TerrainChunk
             {
                 float worldX = chunkWorldPosition.x + x;
                 float worldZ = chunkWorldPosition.y + y;
-                float worldY = terrainContextMap.heightMap.values[x, y];
+                float worldY = terrainContextMap.heightMap.getHeight(x, y);
 
                 Vector3 start = new (worldX, worldY, worldZ);
                 int primary = biomeMap.primary[x, y];

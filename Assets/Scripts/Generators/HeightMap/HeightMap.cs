@@ -22,7 +22,7 @@ namespace Generators.HeightMap
         
         public float getRawHeight(int x, int y)
         {
-            return values[x, y] / heightMultiplier;
+            return values[x, y];
         }
 
         public float getHeightMultiplier()
