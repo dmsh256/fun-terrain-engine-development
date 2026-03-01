@@ -306,8 +306,8 @@ public class TerrainChunk
 
     private void CreateWater(Material material)
     {
-        float waterLevel = worldSettings.waterLevel * terrainContextMap.heightMap.heightMultiplier;
-        if (terrainContextMap.heightMap.minValue > waterLevel)
+        float waterLevel = worldSettings.waterLevel * terrainContextMap.heightMap.getHeightMultiplier();
+        if (terrainContextMap.heightMap.getMinHeightValue() > waterLevel)
             return;
         
         waterObject = GameObject.CreatePrimitive(PrimitiveType.Plane);
