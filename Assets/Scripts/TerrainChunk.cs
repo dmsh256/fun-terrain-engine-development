@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using Generators;
 using Generators.HeightMap;
-using Generators.HeightMap.HeightMapModifiers;
 using Generators.MeshGenerator;
 using Generators.Terrain;
 using Settings;
 using UnityEngine;
 using WorldGeneration.Biomes;
+using WorldGeneration.WorldStructuralModifiers;
 using Object = UnityEngine.Object;
 
 public class TerrainChunk
@@ -55,6 +55,8 @@ public class TerrainChunk
     
     private Texture2D splatMap;
     private readonly Material runtimeMaterial;
+    
+    private WorldStructure worldStructure;
     
     public TerrainChunk(Vector2Int coordinates, WorldSettings worldSettings, HeightMapSettings heightMapSettings, MeshSettings meshSettings,
         LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, LayerMask terrainLayerMask)
@@ -105,18 +107,34 @@ public class TerrainChunk
         worldHeightModifiers.Add(modifier);
     }
     
+    public void SetWorldStructure(WorldStructure worldStructure)
+    {
+        this.worldStructure = worldStructure;
+    }
+    
     public void LoadAsync()
     {
+        TerrainContextMapGenerator terrainContextMapGenerator = new(worldSettings);
+        
         List<IHeightMapModifier> effectiveModifiers = new();
         foreach (IHeightMapModifier modifier in worldHeightModifiers)
         {
-           /* if (modifier.bounds.Intersects(bounds))*/
+           if (modifier.bounds.Intersects(bounds))
                 effectiveModifiers.Add(modifier);
         }
+        terrainContextMapGenerator.SetHeightModifiers(effectiveModifiers);
+        
+        List<IStructuralHeightModifier> effectiveStructuralModifiers = new();
+        foreach (IStructuralHeightModifier structuralModifier in worldStructure.structuralModifiers)
+        {
+            if (structuralModifier.bounds.Intersects(bounds))
+                effectiveStructuralModifiers.Add(structuralModifier);
+        }
+        terrainContextMapGenerator.SetStructuralModifiers(effectiveStructuralModifiers);
         
         ThreadedDataRequester.RequestData(
-            () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
-                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnTerrainContextReceived);
+            () => terrainContextMapGenerator.GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
+                heightMapSettings, sampleStartCoordinates, worldSettings.biomes), OnTerrainContextReceived);
     }
     
     private void OnTerrainContextReceived(object terrainContextObject)

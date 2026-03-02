@@ -9,9 +9,9 @@ namespace Managers.Player
             Rigidbody rigidBody = viewer.GetComponentInParent<Rigidbody>();
             Collider collider = rigidBody.GetComponent<Collider>();
             collider.enabled = false;
-
-            Ray ray = new (viewer.position + Vector3.up * 100f, Vector3.down);
-            if (Physics.Raycast(ray, out RaycastHit hit, 1000f, layerMask))
+// TODO freeze the RB while loading and remove 10/10k
+            Ray ray = new (viewer.position + Vector3.up * 10000f, Vector3.down);
+            if (Physics.Raycast(ray, out RaycastHit hit, 15000f, layerMask))
             {
                 rigidBody.MovePosition(
                     new Vector3(rigidBody.position.x, hit.point.y + 1.5f, rigidBody.position.z)

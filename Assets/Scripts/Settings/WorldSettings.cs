@@ -1,4 +1,5 @@
 using Settings.Biome;
+using Settings.WorldStructuralModifiers;
 
 namespace Settings
 {
@@ -35,6 +36,8 @@ namespace Settings
         
         [Header("Scale")]
         public float worldStep = 1f;
+        
+        public CanyonSettings canyonSettings; // TODO make canyons between lakes optional
     }
     
     public enum BiomeBlending {

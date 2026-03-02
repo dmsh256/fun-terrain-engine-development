@@ -1,4 +1,4 @@
-using WorldGeneration.WorldContextGenerator;
+using WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier;
 
 namespace Utils.InGameDebug
 {
@@ -6,11 +6,11 @@ namespace Utils.InGameDebug
 
     public class WorldContextDebugDrawer : MonoBehaviour
     {
-        public static WorldContext worldContext;
+        public static LakeStructuralModifierContext LakeStructuralModifierContext;
 
         private void OnDrawGizmos()
         {
-            if (worldContext == null)
+            if (LakeStructuralModifierContext == null)
                 return;
 
             DrawLakes();
@@ -22,10 +22,10 @@ namespace Utils.InGameDebug
         {
             Gizmos.color = Color.cyan;
 
-            foreach (WorldContextGenerator.LakeData lake in worldContext.lakes)
+            foreach (LakeConnectionGenerator.LakeData lakeData in LakeStructuralModifierContext.lakes)
             {
-                Vector3 pos = new (lake.lakeCenterWorldCoordinates.x, 50f, lake.lakeCenterWorldCoordinates.y);
-                Gizmos.DrawSphere(pos, 100f);
+                Vector3 position = new (lakeData.lakeCenterWorldCoordinates.x, 50f, lakeData.lakeCenterWorldCoordinates.y);
+                Gizmos.DrawSphere(position, 100f);
             }
         }
 
@@ -33,10 +33,10 @@ namespace Utils.InGameDebug
         {
             Gizmos.color = Color.yellow;
 
-            foreach (WorldContextGenerator.LakeConnection c in worldContext.connections)
+            foreach (LakeConnectionGenerator.LakeConnection lakeConnection in LakeStructuralModifierContext.lakeConnections)
             {
-                Vector2 a = worldContext.lakes[c.pointA].lakeCenterWorldCoordinates;
-                Vector2 b = worldContext.lakes[c.pointB].lakeCenterWorldCoordinates;
+                Vector2 a = LakeStructuralModifierContext.lakes[lakeConnection.pointA].lakeCenterWorldCoordinates;
+                Vector2 b = LakeStructuralModifierContext.lakes[lakeConnection.pointB].lakeCenterWorldCoordinates;
 
                 Gizmos.DrawLine(
                     new Vector3(a.x, 50f, a.y),
@@ -49,12 +49,12 @@ namespace Utils.InGameDebug
         {
             Gizmos.color = Color.red;
 
-            foreach (WorldContextGenerator.CanyonPath path in worldContext.CanyonPaths)
+            foreach (LakeConnectionGenerator.CanyonPath canyonPath in LakeStructuralModifierContext.canyonPaths)
             {
-                for (int i = 0; i < path.points.Count - 1; i++)
+                for (int i = 0; i < canyonPath.points.Count - 1; i++)
                 {
-                    Vector2 a = path.points[i];
-                    Vector2 b = path.points[i + 1];
+                    Vector2 a = canyonPath.points[i];
+                    Vector2 b = canyonPath.points[i + 1];
 
                     Gizmos.DrawLine(
                         new Vector3(a.x, 60f, a.y),

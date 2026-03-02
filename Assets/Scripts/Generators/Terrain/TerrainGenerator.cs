@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using Generators.HeightMap.HeightMapModifiers;
 using Generators.WorldBorders;
 using Managers.Player;
 using Managers.World;
 using Settings;
 using UI.LoadingScreen;
 using UnityEngine;
-using Utils.InGameDebug;
 using WorldGeneration;
 using WorldGeneration.Biomes;
-using WorldGeneration.WorldContextGenerator;
+using WorldGeneration.WorldStructuralModifiers;
 
 namespace Generators.Terrain
 {
@@ -61,17 +59,16 @@ namespace Generators.Terrain
         
         private WorldBorderGenerator worldBorderGenerator;
 
-        private WorldContext worldContext;
+        private WorldStructure worldStructure;
         
         public void Start()
         {
             worldManager = new WorldManager(worldSettings, meshSettings);
             loadingScreen?.Show();
 
-            WorldContextGenerator worldContextGenerator = new(worldSettings, heightMapSettings);
-            worldContext = worldContextGenerator.GenerateWorldContext(100);
-            
-            WorldContextDebugDrawer.worldContext = worldContext;
+            WorldStructureGenerator worldStructureGenerator = new();
+            worldStructure = worldStructureGenerator.Generate(
+                worldSettings, heightMapSettings, meshSettings, 100); //TODO to settings
             
             Texture2DArray albedoArray =
                 BiomeAlbedoArrayBuilder.Build(worldSettings.biomes);
@@ -180,12 +177,7 @@ namespace Generators.Terrain
         private void CreateAndLoadNewTerrainChunk(Vector2Int viewedChunkCoord)
         {
             TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
-            
-            newChunk.SetHeightModifier(new CanyonModifier(
-               worldContext.CanyonPaths,
-               trenchWidth: 600f,
-               waterLevel: worldSettings.waterLevel
-           ));
+            newChunk.SetWorldStructure(worldStructure);
             
             terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
             newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;

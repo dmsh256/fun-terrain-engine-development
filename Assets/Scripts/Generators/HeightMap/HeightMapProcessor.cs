@@ -11,26 +11,26 @@ namespace Generators.HeightMap
     {
         private const float DefaultHeightMultiplier = 1f;
         
-        private List<IHeightMapModifier> heightModifiers;
+        private List<IHeightMapModifier> heightModifiersList;
 
         public void SetHeightModifiers(List<IHeightMapModifier> heightModifiers)
         {
-            this.heightModifiers = heightModifiers;
+            heightModifiersList = heightModifiers;
         }
         
-        public TerrainContextMap ProcessHeight(float[,] values, HeightMapSettings settings, Vector2 sampleCentre, BiomeDensityMap biomeMap, BiomeData[] biomes)
+        public TerrainContextMap ProcessHeight(float[,] values, HeightMapSettings heightMapSettings, Vector2 sampleCentre, BiomeDensityMap biomeDensityMap, BiomeData[] biomes)
         {
             int width = values.GetLength(0);
             int length = values.GetLength(1);
 
-            float heightMultiplier = settings.useHeightMultiplier
-                ? settings.heightMultiplier
+            float heightMultiplier = heightMapSettings.useHeightMultiplier
+                ? heightMapSettings.heightMultiplier
                 : DefaultHeightMultiplier;
 
             float minValue = float.MaxValue;
             float maxValue = float.MinValue;
 
-            if (heightModifiers != null) // no branching in the hot path
+            if (heightModifiersList != null) // no branching in the hot path
             {
                 for (int y = 0; y < length; y++)
                 {
@@ -40,7 +40,7 @@ namespace Generators.HeightMap
                         float worldX = sampleCentre.x + x;
                         float height = values[x, y];
                         
-                        height = ApplyBiomeShaping(biomes, biomeMap, x, y, worldX, worldZ, height);
+                        height = ApplyBiomeShaping(biomes, biomeDensityMap, x, y, worldX, worldZ, height);
                         height = ApplyModifiers(worldX, worldZ, height);
                         
                         height *= heightMultiplier;
@@ -61,7 +61,7 @@ namespace Generators.HeightMap
                         float worldX = sampleCentre.x + x;
                         float height = values[x, y];
                         
-                        height = ApplyBiomeShaping(biomes, biomeMap, x, y, worldX, worldZ, height);
+                        height = ApplyBiomeShaping(biomes, biomeDensityMap, x, y, worldX, worldZ, height);
                         
                         height *= heightMultiplier;
                         values[x, y] = height;
@@ -74,7 +74,8 @@ namespace Generators.HeightMap
             
             return new TerrainContextMap(
                 new HeightMap(values, minValue, maxValue, heightMultiplier),
-                biomeMap
+                biomeDensityMap,
+                sampledFrom: sampleCentre
             );
         }
 
@@ -103,9 +104,9 @@ namespace Generators.HeightMap
 
         private float ApplyModifiers(float worldX, float worldZ, float height)
         {
-            for (int i = 0; i < heightModifiers.Count; i++)
+            for (int i = 0; i < heightModifiersList.Count; i++)
             {
-                height = heightModifiers[i].Evaluate(worldX, worldZ, height);
+                height = heightModifiersList[i].Evaluate(worldX, worldZ, height);
             }
 
             return height;

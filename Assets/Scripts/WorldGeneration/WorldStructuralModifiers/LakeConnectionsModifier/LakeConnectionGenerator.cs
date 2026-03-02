@@ -4,90 +4,63 @@ using Generators;
 using Generators.HeightMap;
 using Settings;
 using UnityEngine;
+using WorldGeneration.Terrain;
 
-namespace WorldGeneration.WorldContextGenerator
+namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
 {
-    public class WorldContextGenerator
+    public class LakeConnectionGenerator
     {
+        private readonly float maxConnectionDistance;
+        private readonly float wiggleFrequency;
+        private readonly int connectionPathSegments;
+        private readonly int trenchWidth;
+        
         private readonly TerrainContextMapGenerator terrainContextGenerator;
         private readonly WorldSettings worldSettings;
         private readonly HeightMapSettings heightMapSettings;
+        private readonly MeshSettings meshSettings;
 
-        public WorldContextGenerator(WorldSettings worldSettings, HeightMapSettings heightMapSettings)
+        public LakeConnectionGenerator(WorldSettings worldSettings, HeightMapSettings heightMapSettings, MeshSettings meshSettings)
         {
             this.worldSettings = worldSettings;
             this.heightMapSettings = heightMapSettings;
+            this.meshSettings = meshSettings;
+
+            maxConnectionDistance = worldSettings.canyonSettings.maxConnectionDistance;
+            wiggleFrequency = worldSettings.canyonSettings.wiggleFrequency;
+            connectionPathSegments = worldSettings.canyonSettings.connectionPathSegments;
+            trenchWidth = worldSettings.canyonSettings.trenchWidth;
         }
         
-        public WorldContext GenerateWorldContext(int resolution)
+        public LakeStructuralModifierContext GenerateWorldContext(int resolution)
         {
-            float worldWidth = worldSettings.worldSizeInChunksX * (242) * worldSettings.worldStep;
+            float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize * worldSettings.worldStep;
             float globalWorldStep = worldWidth / (resolution - 1);
-
-            int minChunkIndex = worldSettings.worldSizeInChunksX / 2;
-            int maxChunkIndex = worldSettings.worldSizeInChunksX / 2 - 1;
-
-            int worldMinX = -minChunkIndex * 242;
-            int worldMaxX = -(maxChunkIndex + 1) * 242;
             
-            Vector2 worldBottomLeft = new (worldMinX, worldMaxX);
-
-            float originalWorldStep = worldSettings.worldStep;
-            worldSettings.worldStep = globalWorldStep;
+            TerrainContextMapLowResSampler terrainContextMapLowResSampler = new (worldSettings, heightMapSettings, meshSettings);
+            TerrainContextMap terrainContextMap = terrainContextMapLowResSampler.GetTerrainContextMapLowRes(resolution);
             
-            TerrainContextMapGenerator terrainContextGenerator = new (worldSettings);
-            TerrainContextMap globalMap = terrainContextGenerator.GenerateTerrainContextMap(resolution,
-                    resolution, heightMapSettings, worldBottomLeft, worldSettings.biomes);
-
-            worldSettings.worldStep = originalWorldStep;
-
-            bool[,] waterMask = BuildWaterMask(globalMap.heightMap, worldSettings.waterLevel);
-            
+            bool[,] waterMask = BuildWaterMask(terrainContextMap.heightMap, worldSettings.waterLevel);
             bool[,] oceanVisited = new bool[resolution, resolution];
+            
             FloodFillOcean(waterMask, oceanVisited);
-            List<LakeData> lakes = ExtractBasins(waterMask, oceanVisited, globalWorldStep, worldBottomLeft);
-            
-            Debug.Log(lakes.Count);
-            
-            float maxDistance = 2500; // tweak
-
-            List<LakeConnection> connections =
-                BuildCanyonConnections(lakes, maxDistance);
-            
+            List<LakeData> lakes = ExtractBasins(waterMask, oceanVisited, globalWorldStep, terrainContextMap.sampledFrom);
+            List<LakeConnection> connections = BuildCanyonConnections(lakes);
             List<CanyonPath> canyonPaths = BuildCanyonPaths(lakes, connections, worldWidth);
             
-            Debug.Log(connections.Count);
-            
-            return new WorldContext
+            return new LakeStructuralModifierContext
             {
-                globalScaledHeightMap = globalMap.heightMap,
-                globalScaledBiomeMap = globalMap.biomeDensityMap,
-                resolution = resolution,
-                worldStep = globalWorldStep,
-                CanyonPaths = canyonPaths,
+                trenchWidth = trenchWidth,
+                canyonPaths = canyonPaths,
                 lakes = lakes,
-                connections = connections
+                lakeConnections = connections
             };
         }
         
-        public struct LakeConnection
-        {
-            public int pointA;
-            public int pointB;
-        }
-        
-        public class CanyonPath
-        {
-            public List<Vector2> points;
-        }
-        
-        private List<CanyonPath> BuildCanyonPaths(List<LakeData> lakes, List<LakeConnection> connections, float worldSize)
+        private List<CanyonPath> BuildCanyonPaths(List<LakeData> lakes, List<LakeConnection> connections, float worldWidth)
         {
             List<CanyonPath> paths = new();
-
-            const float wiggleFrequency = 0.001f;
-            float wiggleStrength  = worldSize * 0.05f;
-            const int segments = 20;
+            float wiggleStrength = worldWidth * 0.05f;
 
             foreach (LakeConnection c in connections)
             {
@@ -99,9 +72,9 @@ namespace WorldGeneration.WorldContextGenerator
 
                 List<Vector2> points = new();
                 points.Add(pointA);
-                for (int i = 1; i < segments; i++)
+                for (int i = 1; i < connectionPathSegments; i++)
                 {
-                    float t = i / (float)segments;
+                    float t = i / (float)connectionPathSegments;
                     Vector2 point = Vector2.Lerp(pointA, pointB, t);
                     float noise = Mathf.PerlinNoise(point.x * wiggleFrequency, point.y * wiggleFrequency);
                     float offset = (noise - 0.5f) * 2f * wiggleStrength;
@@ -111,13 +84,15 @@ namespace WorldGeneration.WorldContextGenerator
                 }
 
                 points.Add(pointB);
-                paths.Add(new CanyonPath { points = points });
+                Bounds bounds = ComputeBounds(points);
+                CanyonPath canyonPath = new() { points = points, bounds = bounds };
+                paths.Add(canyonPath);
             }
 
             return paths;
         }
         
-        private List<LakeConnection> BuildCanyonConnections(List<LakeData> lakes, float maxDistance)
+        private List<LakeConnection> BuildCanyonConnections(List<LakeData> lakes)
         {
             List<LakeConnection> connections = new();
             HashSet<(int,int)> used = new();
@@ -142,14 +117,12 @@ namespace WorldGeneration.WorldContextGenerator
                 if (nearest == null)
                     continue;
 
-                float dist = Vector2.Distance(current.lakeCenterWorldCoordinates, nearest.lake.lakeCenterWorldCoordinates);
-
-                if (dist > maxDistance)
+                float distance = Vector2.Distance(current.lakeCenterWorldCoordinates, nearest.lake.lakeCenterWorldCoordinates);
+                if (distance > maxConnectionDistance)
                     continue;
 
                 int a = Mathf.Min(i, nearest.index);
                 int b = Mathf.Max(i, nearest.index);
-
                 if (!used.Add((a, b)))
                     continue;
 
@@ -282,10 +255,48 @@ namespace WorldGeneration.WorldContextGenerator
             }
         }
         
-        public class LakeData
+        private Bounds ComputeBounds(List<Vector2> points)
+        {
+            float minX = float.MaxValue;
+            float maxX = float.MinValue;
+            float minZ = float.MaxValue;
+            float maxZ = float.MinValue;
+
+            foreach (Vector2 point in points)
+            {
+                if (point.x < minX) minX = point.x;
+                if (point.x > maxX) maxX = point.x;
+                if (point.y < minZ) minZ = point.y;
+                if (point.y > maxZ) maxZ = point.y;
+            }
+
+            minX -= trenchWidth;
+            maxX += trenchWidth;
+            minZ -= trenchWidth;
+            maxZ += trenchWidth;
+
+            Vector3 center = new ((minX + maxX) * 0.5f, 0f, (minZ + maxZ) * 0.5f);
+            Vector3 size = new (maxX - minX, 0f, maxZ - minZ);
+
+            return new Bounds(center, size);
+        }
+        
+        public struct LakeData
         {
             public Vector2 lakeCenterWorldCoordinates;
-            public float lakeArea;
+            public float lakeArea; // TODO filter by area
+        }
+        
+        public struct LakeConnection
+        {
+            public int pointA;
+            public int pointB;
+        }
+        
+        public struct CanyonPath
+        {
+            public List<Vector2> points;
+            public Bounds bounds;
         }
     }
 }
