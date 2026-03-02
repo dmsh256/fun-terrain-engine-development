@@ -104,6 +104,10 @@ namespace Generators.HeightMap
                 case NoiseBlendMode.Multiply:
                     currentHeight *= layerHeight;
                     break;
+                
+                case NoiseBlendMode.Pow:
+                    currentHeight = Mathf.Pow(currentHeight, layerHeight);
+                    break;
 
                 case NoiseBlendMode.Divide:
                     if (layerHeight != 0f)

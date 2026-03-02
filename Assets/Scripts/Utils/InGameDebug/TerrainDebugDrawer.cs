@@ -17,7 +17,7 @@ namespace Utils.InGameDebug
 
             foreach (TerrainChunk chunk in world.GetVisibleTerrainChunks())
             {
-                chunk.DebugDrawWeights(DrawLine);
+                //chunk.DebugDrawWeights(DrawLine);
             }
         }
         
@@ -26,8 +26,8 @@ namespace Utils.InGameDebug
             if (!Application.isPlaying)
                 return;
 
-            foreach (TerrainChunk chunk in world.GetVisibleTerrainChunks())
-                chunk.DebugDrawWeights(DrawLine);
+           /* foreach (TerrainChunk chunk in world.GetVisibleTerrainChunks())
+                chunk.DebugDrawWeights(DrawLine);*/
         }
 
         private void DrawLine(Vector3 start, Vector3 end, Color color)

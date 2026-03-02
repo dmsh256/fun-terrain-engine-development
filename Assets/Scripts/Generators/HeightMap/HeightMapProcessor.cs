@@ -12,6 +12,11 @@ namespace Generators.HeightMap
         private const float DefaultHeightMultiplier = 1f;
         
         private List<IHeightMapModifier> heightModifiers;
+
+        public void SetHeightModifiers(List<IHeightMapModifier> heightModifiers)
+        {
+            this.heightModifiers = heightModifiers;
+        }
         
         public TerrainContextMap ProcessHeight(float[,] values, HeightMapSettings settings, Vector2 sampleCentre, BiomeDensityMap biomeMap, BiomeData[] biomes)
         {

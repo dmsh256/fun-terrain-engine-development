@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: VoronoiNoiseSettings
   m_EditorClassIdentifier: Assembly-CSharp::Generators.Noise.NoiseSettings
   type: 4
-  scale: 1024
+  scale: 256
   octaves: 0
   noiseFrequency: 2
   noiseAmplitude: 0.6

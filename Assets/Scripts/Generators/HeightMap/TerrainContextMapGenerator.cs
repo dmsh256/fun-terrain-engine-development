@@ -32,6 +32,7 @@ namespace Generators.HeightMap
             BiomeDensityMap biomeDensityMap =
                 biomeGenerator.GenerateBiomeMap(width, length, biomes, structuralHeight, sampleCentre, worldSettings);
             
+            heightMapProcessor.SetHeightModifiers(heightModifiers);
             return heightMapProcessor.ProcessHeight(structuralHeight, heightMapSettings, sampleCentre, biomeDensityMap, biomes);
         }
     }

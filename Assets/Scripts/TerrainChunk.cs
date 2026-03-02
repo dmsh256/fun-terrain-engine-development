@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Generators;
 using Generators.HeightMap;
+using Generators.HeightMap.HeightMapModifiers;
 using Generators.MeshGenerator;
 using Generators.Terrain;
 using Settings;
@@ -109,7 +110,7 @@ public class TerrainChunk
         List<IHeightMapModifier> effectiveModifiers = new();
         foreach (IHeightMapModifier modifier in worldHeightModifiers)
         {
-            if (modifier.bounds.Intersects(bounds))
+           /* if (modifier.bounds.Intersects(bounds))*/
                 effectiveModifiers.Add(modifier);
         }
         
