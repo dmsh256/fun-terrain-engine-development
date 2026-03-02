@@ -1,6 +1,4 @@
-Pipeline: noise generation -> applying modifiers -> building mesh and collision mesh -> placing objects
 
-A little messy, not optimal because in progress.
 
 Upcoming: cliffs, rivers.
 
@@ -20,7 +18,9 @@ Upcoming: cliffs, rivers.
 
 ![snow_cap.png](snow_cap.png)
 
-List of features:
+![connections_between_lakes.png](connections_between_lakes.png)
+
+## List of features:
 ### 1. Procedural Heightmap Generation (Layered Noise System)
 At the core: multi-layer noise synthesis, able of combining:
 - Perlin noise
@@ -71,7 +71,7 @@ Implemented:
 - Spawn rate limiting per frame
 - Thousands of objects
 - Tens of thousands of grass instances
-- Stable 200 FPS (tested only on static vegetation)
+- Stable 200 FPS, boots in 6-7 seconds (100x100 chunks)
 - Lazy loading
 - No leaks
 

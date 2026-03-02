@@ -7,6 +7,7 @@ using Generators.Terrain;
 using Settings;
 using UnityEngine;
 using WorldGeneration.Biomes;
+using WorldGeneration.WorldStructuralModifiers;
 using Object = UnityEngine.Object;
 
 public class TerrainChunk
@@ -55,6 +56,8 @@ public class TerrainChunk
     private Texture2D splatMap;
     private readonly Material runtimeMaterial;
     
+    private WorldStructure worldStructure;
+    
     public TerrainChunk(Vector2Int coordinates, WorldSettings worldSettings, HeightMapSettings heightMapSettings, MeshSettings meshSettings,
         LODInfo[] detailLevels, int colliderLODIndex, Transform parent, Transform viewer, Material material, LayerMask terrainLayerMask)
     {
@@ -67,7 +70,7 @@ public class TerrainChunk
         this.worldSettings = worldSettings;
         this.terrainLayerMask = terrainLayerMask;
         
-        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * meshSettings.meshWorldSize;
+        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * (meshSettings.meshWorldSize * worldSettings.worldStep);
         
         chunkWorldPosition = coordinates * meshSettings.meshWorldSize;
         Vector3 chunkCenter = new (
@@ -104,18 +107,34 @@ public class TerrainChunk
         worldHeightModifiers.Add(modifier);
     }
     
+    public void SetWorldStructure(WorldStructure worldStructure)
+    {
+        this.worldStructure = worldStructure;
+    }
+    
     public void LoadAsync()
     {
+        TerrainContextMapGenerator terrainContextMapGenerator = new(worldSettings);
+        
         List<IHeightMapModifier> effectiveModifiers = new();
         foreach (IHeightMapModifier modifier in worldHeightModifiers)
         {
-            if (modifier.bounds.Intersects(bounds))
+           if (modifier.bounds.Intersects(bounds))
                 effectiveModifiers.Add(modifier);
         }
+        terrainContextMapGenerator.SetHeightModifiers(effectiveModifiers);
+        
+        List<IStructuralHeightModifier> effectiveStructuralModifiers = new();
+        foreach (IStructuralHeightModifier structuralModifier in worldStructure.structuralModifiers)
+        {
+            if (structuralModifier.bounds.Intersects(bounds))
+                effectiveStructuralModifiers.Add(structuralModifier);
+        }
+        terrainContextMapGenerator.SetStructuralModifiers(effectiveStructuralModifiers);
         
         ThreadedDataRequester.RequestData(
-            () => new TerrainContextMapGenerator(worldSettings).GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
-                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, effectiveModifiers), OnTerrainContextReceived);
+            () => terrainContextMapGenerator.GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
+                heightMapSettings, sampleStartCoordinates, worldSettings.biomes), OnTerrainContextReceived);
     }
     
     private void OnTerrainContextReceived(object terrainContextObject)
@@ -218,7 +237,7 @@ public class TerrainChunk
             {
                 float worldX = chunkWorldPosition.x + x;
                 float worldZ = chunkWorldPosition.y + y;
-                float worldY = terrainContextMap.heightMap.values[x, y];
+                float worldY = terrainContextMap.heightMap.getHeight(x, y);
 
                 Vector3 start = new (worldX, worldY, worldZ);
                 int primary = biomeMap.primary[x, y];
@@ -306,8 +325,8 @@ public class TerrainChunk
 
     private void CreateWater(Material material)
     {
-        float waterLevel = worldSettings.waterLevel * terrainContextMap.heightMap.heightMultiplier;
-        if (terrainContextMap.heightMap.minValue > waterLevel)
+        float waterLevel = worldSettings.waterLevel * terrainContextMap.heightMap.getHeightMultiplier();
+        if (terrainContextMap.heightMap.getMinHeightValue() > waterLevel)
             return;
         
         waterObject = GameObject.CreatePrimitive(PrimitiveType.Plane);

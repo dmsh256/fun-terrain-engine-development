@@ -16,16 +16,14 @@ namespace Utils.InGameDebug
                 return;
 
             foreach (TerrainChunk chunk in world.GetVisibleTerrainChunks())
-            {
                 chunk.DebugDrawWeights(DrawLine);
-            }
         }
         
         private void OnDrawGizmosSelected()
         {
             if (!Application.isPlaying)
                 return;
-
+            
             foreach (TerrainChunk chunk in world.GetVisibleTerrainChunks())
                 chunk.DebugDrawWeights(DrawLine);
         }

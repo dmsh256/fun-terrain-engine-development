@@ -8,6 +8,7 @@ using UI.LoadingScreen;
 using UnityEngine;
 using WorldGeneration;
 using WorldGeneration.Biomes;
+using WorldGeneration.WorldStructuralModifiers;
 
 namespace Generators.Terrain
 {
@@ -57,11 +58,17 @@ namespace Generators.Terrain
         private bool waitingForBootstrap = true;
         
         private WorldBorderGenerator worldBorderGenerator;
+
+        private WorldStructure worldStructure;
         
         public void Start()
         {
             worldManager = new WorldManager(worldSettings, meshSettings);
             loadingScreen?.Show();
+
+            WorldStructureGenerator worldStructureGenerator = new();
+            worldStructure = worldStructureGenerator.Generate(
+                worldSettings, heightMapSettings, meshSettings, 100); //TODO to settings
             
             Texture2DArray albedoArray =
                 BiomeAlbedoArrayBuilder.Build(worldSettings.biomes);
@@ -170,7 +177,8 @@ namespace Generators.Terrain
         private void CreateAndLoadNewTerrainChunk(Vector2Int viewedChunkCoord)
         {
             TerrainChunk newChunk = new(viewedChunkCoord, worldSettings, heightMapSettings, meshSettings, detailLevels, colliderLODIndex, transform, viewer, mapMaterial, layerMask);
-
+            newChunk.SetWorldStructure(worldStructure);
+            
             terrainChunkDictionary.Add(viewedChunkCoord, newChunk);
             newChunk.onVisibilityChanged += OnTerrainChunkVisibilityChanged;
             newChunk.LoadAsync();
@@ -222,7 +230,7 @@ namespace Generators.Terrain
         
         private void Awake()
         {
-            WorldContext.Initialize(worldSettings);
+            WorldContextSettings.Initialize(worldSettings);
         }
     }
 

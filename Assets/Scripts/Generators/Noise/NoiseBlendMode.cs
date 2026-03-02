@@ -5,6 +5,7 @@ namespace Generators.Noise
         Add,
         Subtract,
         Multiply,
+        Pow,
         Divide,
         Replace,
         Max,

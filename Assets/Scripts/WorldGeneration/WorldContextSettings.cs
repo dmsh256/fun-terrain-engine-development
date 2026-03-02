@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace WorldGeneration
 {
-    public static class WorldContext
+    public static class WorldContextSettings
     {
         public static int Seed { get; private set; }
 

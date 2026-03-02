@@ -18,10 +18,10 @@ namespace WorldGeneration.Terrain
                 float tx = position.x - x0;
                 float tz = position.z - z0;
 
-                float h00 = terrainSpawnData.heightMap.values[x0, z0];
-                float h10 = terrainSpawnData.heightMap.values[x1, z0];
-                float h01 = terrainSpawnData.heightMap.values[x0, z1];
-                float h11 = terrainSpawnData.heightMap.values[x1, z1];
+                float h00 = terrainSpawnData.heightMap.getRawHeight(x0, z0);
+                float h10 = terrainSpawnData.heightMap.getRawHeight(x1, z0);
+                float h01 = terrainSpawnData.heightMap.getRawHeight(x0, z1);
+                float h11 = terrainSpawnData.heightMap.getRawHeight(x1, z1);
 
                 float h0 = Mathf.Lerp(h00, h10, tx);
                 float h1 = Mathf.Lerp(h01, h11, tx);

@@ -5,17 +5,17 @@ namespace Generators.Noise.NoiseSource
 {
     public class CustomizablePerlinNoiseSource : INoiseSource
     {
-        private readonly NoiseSettings settings;
+        private readonly NoiseSettings noiseSettings;
 
-        public CustomizablePerlinNoiseSource(NoiseSettings settings)
+        public CustomizablePerlinNoiseSource(NoiseSettings noiseSettings)
         {
-            this.settings = settings;
+            this.noiseSettings = noiseSettings;
         }
 
-        public float[,] Generate(int width, int height, Vector2 sampleCentre)
+        public float[,] Generate(int width, int height, Vector2 sampleCentre, float worldStep)
         {
             return CustomizablePerlinNoiseGenerator.GenerateNoiseMap(
-                width, height, settings, sampleCentre
+                width, height, noiseSettings, sampleCentre, worldStep
             );
         }
     }

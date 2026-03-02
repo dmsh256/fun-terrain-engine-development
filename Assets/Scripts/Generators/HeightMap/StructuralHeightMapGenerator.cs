@@ -4,6 +4,7 @@ using Generators.Noise;
 using Generators.Noise.NoiseSource;
 using Settings;
 using UnityEngine;
+using WorldGeneration.WorldStructuralModifiers;
 
 namespace Generators.HeightMap
 {
@@ -13,11 +14,14 @@ namespace Generators.HeightMap
     public class StructuralHeightMapGenerator
     {
         private readonly List<(INoiseSource source, NoiseLayer layer)> noiseSources = new();
+        private List<IStructuralHeightModifier> structuralModifiersList = new ();
 
-        public float[,] GenerateStructuralHeightMap(int width, int length, HeightMapSettings heightMapSettings, Vector2 sampleCentre)
+        public float[,] GenerateStructuralHeightMap(int width, int length, HeightMapSettings heightMapSettings, Vector2 sampleCentre, List<IStructuralHeightModifier> structuralModifiers = null, float worldStep = 1f)
         {
             if (heightMapSettings.layers == null || heightMapSettings.layers.Count == 0)
                 throw new Exception("No noise layers defined.");
+
+            structuralModifiersList = structuralModifiers;
             
             INoiseSource maskSource = null;
             NoiseLayer maskLayer = null;
@@ -47,7 +51,7 @@ namespace Generators.HeightMap
             float[,] maskValues = null;
 
             if (maskSource != null)
-                maskValues = maskSource.Generate(width, length, sampleCentre);
+                maskValues = maskSource.Generate(width, length, sampleCentre, worldStep);
 
             bool useCurve = heightMapSettings.useHeightCurve;
             AnimationCurve curve = null;
@@ -56,7 +60,7 @@ namespace Generators.HeightMap
             
             foreach ((INoiseSource noiseSource, NoiseLayer noiseLayer) in noiseSources)
             {
-                float[,] heightValues = noiseSource.Generate(width, length, sampleCentre);
+                float[,] heightValues = noiseSource.Generate(width, length, sampleCentre, worldStep);
                 float maskMin = maskLayer.maskSmoothRange.x;
                 float maskMax = maskLayer.maskSmoothRange.y;
                 for (int y = 0; y < length; y++)
@@ -80,9 +84,32 @@ namespace Generators.HeightMap
                 }
             }
 
+            if (structuralModifiersList == null) 
+                return result;
+            {
+                for (int y = 0; y < length; y++)
+                {
+                    float worldZ = sampleCentre.y + y * worldStep;
+                    for (int x = 0; x < width; x++)
+                    {
+                        float worldX = sampleCentre.x + x * worldStep;
+                        float height = ApplyModifiers(worldX, worldZ, result[x, y]);
+                        result[x, y] = height;
+                    }
+                }
+            }
+
             return result;
         }
 
+        private float ApplyModifiers(float worldX, float worldZ, float height)
+        {
+            for (int i = 0; i < structuralModifiersList.Count; i++)
+                height = structuralModifiersList[i].Evaluate(worldX, worldZ, height);
+
+            return height;
+        }
+        
         /**
          * teases to replace it with layer->ApplyBlend(), but it'll require a custom PropertyDrawer
          */
@@ -103,6 +130,10 @@ namespace Generators.HeightMap
 
                 case NoiseBlendMode.Multiply:
                     currentHeight *= layerHeight;
+                    break;
+                
+                case NoiseBlendMode.Pow:
+                    currentHeight = Mathf.Pow(currentHeight, layerHeight);
                     break;
 
                 case NoiseBlendMode.Divide:
