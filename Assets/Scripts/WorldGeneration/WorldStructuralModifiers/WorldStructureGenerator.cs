@@ -16,7 +16,7 @@ namespace WorldGeneration.WorldStructuralModifiers
             foreach (LakeConnectionGenerator.CanyonPath canyonPath in lakeStructuralModifierContext.canyonPaths)
             {
                 IStructuralHeightModifier canyonHeightModifier = new CanyonHeightModifier(
-                    canyonPath, lakeStructuralModifierContext.trenchWidth,
+                    canyonPath, 
                     waterLevel: worldSettings.waterLevel
                 );
                 

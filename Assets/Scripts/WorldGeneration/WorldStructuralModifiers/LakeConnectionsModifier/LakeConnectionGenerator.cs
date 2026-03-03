@@ -15,6 +15,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
         private readonly float wiggleStrengthModifier;
         private readonly int connectionPathSegments;
         private readonly int trenchWidth;
+        private readonly float trenchWidthWiggleStrength;
         
         private readonly TerrainContextMapGenerator terrainContextGenerator;
         private readonly WorldSettings worldSettings;
@@ -52,7 +53,6 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
             
             return new LakeStructuralModifierContext
             {
-                trenchWidth = trenchWidth,
                 canyonPaths = canyonPaths,
                 lakes = lakes,
                 lakeConnections = connections
@@ -64,36 +64,53 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
             List<CanyonPath> paths = new();
             float wiggleStrength = worldWidth * wiggleStrengthModifier;
 
-            foreach (LakeConnection c in connections)
+            foreach (LakeConnection connection in connections)
             {
-                Vector2 pointA = lakes[c.pointA].lakeCenterWorldCoordinates;
-                Vector2 pointB = lakes[c.pointB].lakeCenterWorldCoordinates;
+                Vector2 pointA = lakes[connection.pointA].lakeCenterWorldCoordinates;
+                Vector2 pointB = lakes[connection.pointB].lakeCenterWorldCoordinates;
+
+                float trenchRandomWidth = RandomizeTrenchWidth(pointA, pointB);
 
                 Vector2 direction = (pointB - pointA).normalized;
                 Vector2 perpendicular = new (-direction.y, direction.x);
 
                 List<Vector2> points = new();
                 points.Add(pointA);
+                
+                float totalLength = Vector2.Distance(pointA, pointB);
                 for (int i = 1; i < connectionPathSegments; i++)
                 {
                     float t = i / (float)connectionPathSegments;
                     Vector2 point = Vector2.Lerp(pointA, pointB, t);
-                    float noise = Mathf.PerlinNoise(point.x * wiggleFrequency, point.y * wiggleFrequency);
-                    float offset = (noise - 0.5f) * 2f * wiggleStrength;
-                    point += perpendicular * offset;
 
+                    float distanceAlong = totalLength * t;
+                    float noise = Mathf.PerlinNoise(distanceAlong * wiggleFrequency, 0f);
+                    float offset = (noise - 0.5f) * 2f * wiggleStrength;
+
+                    point += perpendicular * offset;
                     points.Add(point);
                 }
 
                 points.Add(pointB);
-                Bounds bounds = ComputeBounds(points);
-                CanyonPath canyonPath = new() { points = points, bounds = bounds };
+                Bounds bounds = ComputeBounds(points, trenchRandomWidth);
+                CanyonPath canyonPath = new() { points = points, bounds = bounds, trenchWidth = trenchRandomWidth };
                 paths.Add(canyonPath);
             }
 
             return paths;
         }
-        
+
+        private float RandomizeTrenchWidth(Vector2 pointA, Vector2 pointB)
+        {
+            float baseWidth = trenchWidth;
+            float seed = pointA.x * 0.001f + pointB.y * 0.001f;
+            float variationNoise = Mathf.PerlinNoise(seed, 0f);
+            float variation = variationNoise - 0.5f;
+            float trenchRandomWidth = baseWidth + variation * baseWidth;
+            
+            return trenchRandomWidth;
+        }
+
         private List<LakeConnection> BuildCanyonConnections(List<LakeData> lakes)
         {
             List<LakeConnection> connections = new();
@@ -257,7 +274,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
             }
         }
         
-        private Bounds ComputeBounds(List<Vector2> points)
+        private Bounds ComputeBounds(List<Vector2> points, float trenchRandomWidth)
         {
             float minX = float.MaxValue;
             float maxX = float.MinValue;
@@ -272,10 +289,10 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
                 if (point.y > maxZ) maxZ = point.y;
             }
 
-            minX -= trenchWidth;
-            maxX += trenchWidth;
-            minZ -= trenchWidth;
-            maxZ += trenchWidth;
+            minX -= trenchRandomWidth;
+            maxX += trenchRandomWidth;
+            minZ -= trenchRandomWidth;
+            maxZ += trenchRandomWidth;
 
             Vector3 center = new ((minX + maxX) * 0.5f, 0f, (minZ + maxZ) * 0.5f);
             Vector3 size = new (maxX - minX, 0f, maxZ - minZ);
@@ -299,6 +316,8 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
         {
             public List<Vector2> points;
             public Bounds bounds;
+            
+            public float trenchWidth;
         }
     }
 }

@@ -12,10 +12,10 @@ namespace Generators.HeightMap.HeightMapModifiers
         
         public Bounds bounds { get; }
         
-        public CanyonHeightModifier(LakeConnectionGenerator.CanyonPath canyonPath, float trenchWidth, float waterLevel)
+        public CanyonHeightModifier(LakeConnectionGenerator.CanyonPath canyonPath, float waterLevel)
         {
             this.canyonPath = canyonPath;
-            trenchWidthSqr = trenchWidth * trenchWidth;
+            trenchWidthSqr = canyonPath.trenchWidth * canyonPath.trenchWidth;
             this.waterLevel = waterLevel - 0.1f;
 
             bounds = this.canyonPath.bounds;
@@ -33,7 +33,9 @@ namespace Generators.HeightMap.HeightMapModifiers
                 return height;
 
             float normalized = 1f - minDistSqr / trenchWidthSqr;
-            float profile = Mathf.Pow(normalized, 1.25f);
+            float slopeNoise = Mathf.PerlinNoise(worldX * 0.01f, worldZ * 0.01f);
+            float slopePower = Mathf.Lerp(1.1f, 2.2f, slopeNoise);
+            float profile = Mathf.Pow(normalized, slopePower);
 
             if (height <= waterLevel)
                 return height;
