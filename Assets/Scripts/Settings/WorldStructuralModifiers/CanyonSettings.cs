@@ -11,6 +11,9 @@ namespace Settings.WorldStructuralModifiers
         [Range(0f, 0.01f)]
         public float wiggleFrequency = 0.001f;
 
+        [Range(0.01f, 0.1f)]
+        public float wiggleStrengthModifier = 0.005f;
+        
         [Range(2, 20)]
         public int connectionPathSegments = 6;
 

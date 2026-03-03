@@ -12,6 +12,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
     {
         private readonly float maxConnectionDistance;
         private readonly float wiggleFrequency;
+        private readonly float wiggleStrengthModifier;
         private readonly int connectionPathSegments;
         private readonly int trenchWidth;
         
@@ -28,6 +29,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
 
             maxConnectionDistance = worldSettings.canyonSettings.maxConnectionDistance;
             wiggleFrequency = worldSettings.canyonSettings.wiggleFrequency;
+            wiggleStrengthModifier = worldSettings.canyonSettings.wiggleStrengthModifier;
             connectionPathSegments = worldSettings.canyonSettings.connectionPathSegments;
             trenchWidth = worldSettings.canyonSettings.trenchWidth;
         }
@@ -60,7 +62,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
         private List<CanyonPath> BuildCanyonPaths(List<LakeData> lakes, List<LakeConnection> connections, float worldWidth)
         {
             List<CanyonPath> paths = new();
-            float wiggleStrength = worldWidth * 0.05f;
+            float wiggleStrength = worldWidth * wiggleStrengthModifier;
 
             foreach (LakeConnection c in connections)
             {
