@@ -34,10 +34,8 @@ namespace Settings
         [Header("Water level")]
         public float waterLevel = 0.0125f;
         
-        [Header("Scale")]
-        public float worldStep = 1f;
-        
         public CanyonSettings canyonSettings; // TODO make canyons between lakes optional
+        public MountainsSettings mountainsSettings;
     }
     
     public enum BiomeBlending {

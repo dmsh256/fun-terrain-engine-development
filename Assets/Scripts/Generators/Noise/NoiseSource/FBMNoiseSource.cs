@@ -12,10 +12,10 @@ namespace Generators.Noise.NoiseSource
             this.noiseSettings = noiseSettings;
         }
 
-        public float[,] Generate(int width, int height, Vector2 sampleCentre, float worldStep)
+        public float[,] Generate(int width, int height, Vector2 sampleCentre, float step)
         {
             return FBMNoiseGenerator.GenerateNoiseMap(
-                width, height, noiseSettings, sampleCentre, worldStep
+                width, height, noiseSettings, sampleCentre, step
             );
         } 
     }

@@ -11,7 +11,7 @@ namespace Generators.BiomeMap
         private const float heightBlendRange = 0.01f;
 
         public BiomeDensityMap GenerateBiomeMap(int width, int height, BiomeData[] biomes, float[,] heightMap, Vector2 sampleCentre,
-            WorldSettings worldSettings)
+            WorldSettings worldSettings, float step = 1f)
         {
             BiomeDensityMap biomeDensityMap = new()
             {
@@ -44,8 +44,8 @@ namespace Generators.BiomeMap
             {
                 for (int x = 0; x < height; x++)
                 {
-                    float worldX = x * worldSettings.worldStep + sampleCentre.x;
-                    float worldY = y * worldSettings.worldStep + sampleCentre.y;
+                    float worldX = x * step + sampleCentre.x;
+                    float worldY = y * step + sampleCentre.y;
                     
                     float warpX =
                         Noise(worldX * WorldBiomeGenSettings.biomeWarpFrequency + 1000f,

@@ -6,7 +6,6 @@ using Generators.MeshGenerator;
 using Generators.Terrain;
 using Settings;
 using UnityEngine;
-using WorldGeneration.Biomes;
 using WorldGeneration.WorldStructuralModifiers;
 using Object = UnityEngine.Object;
 
@@ -51,8 +50,7 @@ public class TerrainChunk
 
     private GameObject waterObject;
     private readonly List<IHeightMapModifier> worldHeightModifiers = new();
-    private readonly Vector2 chunkWorldPosition;
-    
+
     private Texture2D splatMap;
     private readonly Material runtimeMaterial;
     
@@ -70,13 +68,13 @@ public class TerrainChunk
         this.worldSettings = worldSettings;
         this.terrainLayerMask = terrainLayerMask;
         
-        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * (meshSettings.meshWorldSize * worldSettings.worldStep);
+        sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * meshSettings.meshWorldSize;
         
-        chunkWorldPosition = coordinates * meshSettings.meshWorldSize;
+        Vector2 chunkWorldPosition1 = coordinates * meshSettings.meshWorldSize;
         Vector3 chunkCenter = new (
-            chunkWorldPosition.x + meshSettings.meshWorldSize * 0.5f,
+            chunkWorldPosition1.x + meshSettings.meshWorldSize * 0.5f,
             0f,
-            chunkWorldPosition.y + meshSettings.meshWorldSize * 0.5f
+            chunkWorldPosition1.y + meshSettings.meshWorldSize * 0.5f
         );
         bounds = new Bounds(chunkCenter, new Vector3(meshSettings.meshWorldSize, 0f, meshSettings.meshWorldSize));
         
@@ -88,7 +86,7 @@ public class TerrainChunk
         runtimeMaterial = new Material(material);
         meshRenderer.material = runtimeMaterial;
 
-        meshObject.transform.position = new Vector3(chunkWorldPosition.x, 0f, chunkWorldPosition.y);
+        meshObject.transform.position = new Vector3(chunkWorldPosition1.x, 0f, chunkWorldPosition1.y);
         meshObject.transform.parent = parent;
         SetVisible(false);
         
@@ -225,7 +223,7 @@ public class TerrainChunk
 
     public void DebugDrawWeights(Action<Vector3, Vector3, Color> drawLine)
     {
-        BiomeDensityMap biomeMap = terrainContextMap.biomeDensityMap;
+        /*BiomeDensityMap biomeMap = terrainContextMap.biomeDensityMap;
         
         if (biomeMap.dominance == null) 
             return;
@@ -250,7 +248,7 @@ public class TerrainChunk
 
                 drawLine(start, end, worldSettings.biomes[primary].debugColor);
             }
-        }
+        }*/
     }
     
     public void RequestCollisionMesh(bool force)

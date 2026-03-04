@@ -16,7 +16,8 @@ namespace Generators.HeightMap
         private readonly List<(INoiseSource source, NoiseLayer layer)> noiseSources = new();
         private List<IStructuralHeightModifier> structuralModifiersList = new ();
 
-        public float[,] GenerateStructuralHeightMap(int width, int length, HeightMapSettings heightMapSettings, Vector2 sampleCentre, List<IStructuralHeightModifier> structuralModifiers = null, float worldStep = 1f)
+        public float[,] GenerateStructuralHeightMap(int width, int length, HeightMapSettings heightMapSettings, 
+            Vector2 sampleCentre, List<IStructuralHeightModifier> structuralModifiers = null, float step = 1f)
         {
             if (heightMapSettings.layers == null || heightMapSettings.layers.Count == 0)
                 throw new Exception("No noise layers defined.");
@@ -51,7 +52,7 @@ namespace Generators.HeightMap
             float[,] maskValues = null;
 
             if (maskSource != null)
-                maskValues = maskSource.Generate(width, length, sampleCentre, worldStep);
+                maskValues = maskSource.Generate(width, length, sampleCentre, step);
 
             bool useCurve = heightMapSettings.useHeightCurve;
             AnimationCurve curve = null;
@@ -60,7 +61,7 @@ namespace Generators.HeightMap
             
             foreach ((INoiseSource noiseSource, NoiseLayer noiseLayer) in noiseSources)
             {
-                float[,] heightValues = noiseSource.Generate(width, length, sampleCentre, worldStep);
+                float[,] heightValues = noiseSource.Generate(width, length, sampleCentre, step);
                 float maskMin = maskLayer.maskSmoothRange.x;
                 float maskMax = maskLayer.maskSmoothRange.y;
                 for (int y = 0; y < length; y++)
@@ -89,10 +90,10 @@ namespace Generators.HeightMap
             {
                 for (int y = 0; y < length; y++)
                 {
-                    float worldZ = sampleCentre.y + y * worldStep;
+                    float worldZ = sampleCentre.y + y * step;
                     for (int x = 0; x < width; x++)
                     {
-                        float worldX = sampleCentre.x + x * worldStep;
+                        float worldX = sampleCentre.x + x * step;
                         float height = ApplyModifiers(worldX, worldZ, result[x, y]);
                         result[x, y] = height;
                     }

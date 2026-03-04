@@ -5,7 +5,7 @@ namespace Generators.Noise.Generators
 {
     public class FBMNoiseGenerator : INoiseGenerator
     {
-        public static float[,] GenerateNoiseMap(int mapWidth, int mapLength, NoiseSettings noiseSettings, Vector2 sampleCentre, float worldStep)
+        public static float[,] GenerateNoiseMap(int mapWidth, int mapLength, NoiseSettings noiseSettings, Vector2 sampleCentre, float step)
         {
             float[,] noiseMap = new float[mapWidth, mapLength];
 
@@ -32,8 +32,8 @@ namespace Generators.Noise.Generators
                     float frequency = 1f;
                     amplitude = 1f;
                     float noiseHeight = 0f;
-                    float worldX = sampleCentre.x + x * worldStep;
-                    float worldY = sampleCentre.y + y * worldStep;
+                    float worldX = sampleCentre.x + x * step;
+                    float worldY = sampleCentre.y + y * step;
                     
                     for (int i = 0; i < noiseSettings.octaves; i++)
                     {

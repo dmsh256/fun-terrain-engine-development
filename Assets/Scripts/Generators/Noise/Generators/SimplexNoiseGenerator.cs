@@ -90,7 +90,7 @@ namespace Generators.Noise.Generators
             return 70f * (n0 + n1 + n2);
         }
 
-        public static float[,] GenerateNoiseMap(int width, int height, NoiseSettings noiseSettings, Vector2 sampleCentre, float worldStep)
+        public static float[,] GenerateNoiseMap(int width, int height, NoiseSettings noiseSettings, Vector2 sampleCentre, float step)
         {
             int[] perm = BuildPerm(WorldContextSettings.Seed);
 
@@ -99,8 +99,8 @@ namespace Generators.Noise.Generators
             for (int y = 0; y < height; y++)
                 for (int x = 0; x < width; x++)
                 {
-                    float nx = (x * worldStep + sampleCentre.x + noiseSettings.offset.x) / noiseSettings.scale;
-                    float ny = (y * worldStep + sampleCentre.y + noiseSettings.offset.y) / noiseSettings.scale;
+                    float nx = (x * step + sampleCentre.x + noiseSettings.offset.x) / noiseSettings.scale;
+                    float ny = (y * step + sampleCentre.y + noiseSettings.offset.y) / noiseSettings.scale;
 
                     float value = Simplex(nx, ny, perm);
                     

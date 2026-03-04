@@ -6,7 +6,7 @@ namespace Generators.Noise.Generators.PerlinNoise
 {
     public class CustomizableRidgedPerlinNoiseGenerator
     {
-        public static float[,] GenerateNoiseMap(int mapWidth, int mapLength, NoiseSettings noiseSettings, Vector2 sampleCentre, float worldStep)
+        public static float[,] GenerateNoiseMap(int mapWidth, int mapLength, NoiseSettings noiseSettings, Vector2 sampleCentre, float step)
         {
             float[,] noiseMap = new float[mapWidth, mapLength];
 
@@ -31,8 +31,8 @@ namespace Generators.Noise.Generators.PerlinNoise
                 for (int x = 0; x < mapWidth; x++)
                 {
                     float noiseHeight = 0f;
-                    float worldX = sampleCentre.x + x * worldStep;
-                    float worldY = sampleCentre.y + y * worldStep;
+                    float worldX = sampleCentre.x + x * step;
+                    float worldY = sampleCentre.y + y * step;
                     for (int i = 0; i < octaveCount; i++)
                     {
                         OctaveSettings octaveSettings = noiseSettings.octaveSettings[i];

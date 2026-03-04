@@ -23,8 +23,8 @@ namespace WorldGeneration.Terrain
          */
         public TerrainContextMap GetTerrainContextMapLowRes(int resolution)
         {
-            float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize * worldSettings.worldStep;
-            float samplingWorldStep = worldWidth / (resolution - 1);
+            float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize;
+            float samplingStep = worldWidth / (resolution - 1);
 
             int minChunkIndex = worldSettings.worldSizeInChunksX / 2;
             int maxChunkIndex = worldSettings.worldSizeInChunksX / 2 - 1;
@@ -33,15 +33,10 @@ namespace WorldGeneration.Terrain
             int worldMaxX = -(maxChunkIndex + 1) * meshSettings.meshWorldSize;
             
             Vector2 worldBottomLeft = new (worldMinX, worldMaxX);
-
-            float originalWorldStep = worldSettings.worldStep; // TODO clone worldSettings and change the worldStep then
-            worldSettings.worldStep = samplingWorldStep;
             
             TerrainContextMapGenerator terrainContextGenerator = new (worldSettings);
             TerrainContextMap globalTerrainContextMap = terrainContextGenerator.GenerateTerrainContextMap(resolution,
-                resolution, heightMapSettings, worldBottomLeft, worldSettings.biomes);
-            
-            worldSettings.worldStep = originalWorldStep;
+                resolution, heightMapSettings, worldBottomLeft, worldSettings.biomes, samplingStep);
             
             return globalTerrainContextMap;
         }

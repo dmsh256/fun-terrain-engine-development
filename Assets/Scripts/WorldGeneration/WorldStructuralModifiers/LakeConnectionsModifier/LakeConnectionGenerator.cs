@@ -35,21 +35,22 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
             trenchWidth = worldSettings.canyonSettings.trenchWidth;
         }
         
-        public LakeStructuralModifierContext GenerateWorldContext(int resolution)
+        public LakeStructuralModifierContext GenerateContext(int resolution)
         {
-            float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize * worldSettings.worldStep;
-            float globalWorldStep = worldWidth / (resolution - 1);
+            float totalWorldSize = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize;
             
             TerrainContextMapLowResSampler terrainContextMapLowResSampler = new (worldSettings, heightMapSettings, meshSettings);
             TerrainContextMap terrainContextMap = terrainContextMapLowResSampler.GetTerrainContextMapLowRes(resolution);
+            
+            float step = terrainContextMap.sampledWithStep;
             
             bool[,] waterMask = BuildWaterMask(terrainContextMap.heightMap, worldSettings.waterLevel);
             bool[,] oceanVisited = new bool[resolution, resolution];
             
             FloodFillOcean(waterMask, oceanVisited);
-            List<LakeData> lakes = ExtractBasins(waterMask, oceanVisited, globalWorldStep, terrainContextMap.sampledFrom);
+            List<LakeData> lakes = ExtractBasins(waterMask, oceanVisited, step, terrainContextMap.sampledFrom);
             List<LakeConnection> connections = BuildCanyonConnections(lakes);
-            List<CanyonPath> canyonPaths = BuildCanyonPaths(lakes, connections, worldWidth);
+            List<CanyonPath> canyonPaths = BuildCanyonPaths(lakes, connections, totalWorldSize);
             
             return new LakeStructuralModifierContext
             {

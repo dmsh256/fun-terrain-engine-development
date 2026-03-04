@@ -5,6 +5,8 @@ namespace Settings.WorldStructuralModifiers
     [System.Serializable]
     public class CanyonSettings
     {
+        public bool canyonsBetweenLakesEnabled = true;
+        
         [Range(500f, 5000f)]
         public float maxConnectionDistance = 2500f;
 

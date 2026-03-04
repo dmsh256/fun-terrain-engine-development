@@ -18,7 +18,8 @@ namespace Generators.HeightMap
             heightModifiersList = heightModifiers;
         }
         
-        public TerrainContextMap ProcessHeight(float[,] values, HeightMapSettings heightMapSettings, Vector2 sampleCentre, BiomeDensityMap biomeDensityMap, BiomeData[] biomes)
+        public TerrainContextMap ProcessHeight(float[,] values, HeightMapSettings heightMapSettings, 
+            Vector2 sampleCentre, float sampleStep, BiomeDensityMap biomeDensityMap, BiomeData[] biomes)
         {
             int width = values.GetLength(0);
             int length = values.GetLength(1);
@@ -75,7 +76,8 @@ namespace Generators.HeightMap
             return new TerrainContextMap(
                 new HeightMap(values, minValue, maxValue, heightMultiplier),
                 biomeDensityMap,
-                sampledFrom: sampleCentre
+                sampledFrom: sampleCentre,
+                sampledWithStep: sampleStep
             );
         }
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using WorldGeneration.WorldStructuralModifiers;
 using WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier;
 
-namespace Generators.HeightMap.HeightMapModifiers
+namespace Generators.HeightMap.HeightMapModifiers.StructuralModifiers
 {
     public class CanyonHeightModifier : IStructuralHeightModifier
     {
