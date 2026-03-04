@@ -41,7 +41,7 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
             float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize;
             float step = worldWidth / (resolution - 1);
 
-            int clusterCount = worldSettings.mountainsSettings.mountainClusterCount;
+            int clusterCount = worldSettings.mountainSettings.mountainClusterCount;
 
             int width = terrainContextMap.heightMap.values.GetLength(0);
             int height = terrainContextMap.heightMap.values.GetLength(1);
@@ -82,7 +82,7 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
         private PeakCluster CreateCluster(Vector2 center)
         {
             int peakCount = Random.Range(1, 6);
-            float radius = worldSettings.mountainsSettings.mountainMaxRadius;
+            float radius = worldSettings.mountainSettings.mountainMaxRadius;
 
             List<Peak> peaks = new();
             for (int i = 0; i < peakCount; i++)
@@ -91,8 +91,8 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
                 Vector2 position = center + offset;
 
                 float height = Random.Range(
-                    worldSettings.mountainsSettings.mountainMinHeight,
-                    worldSettings.mountainsSettings.mountainMaxHeight
+                    worldSettings.mountainSettings.mountainMinHeight,
+                    worldSettings.mountainSettings.mountainMaxHeight
                 );
 
                 peaks.Add(new Peak(position, height));

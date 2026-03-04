@@ -3,7 +3,7 @@ using UnityEngine;
 namespace Settings.WorldStructuralModifiers
 {
     [System.Serializable]
-    public class MountainsSettings
+    public class MountainSettings
     {
         public bool mountainsEnabled = true;
         

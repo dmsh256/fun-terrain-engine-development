@@ -29,7 +29,7 @@ namespace WorldGeneration.WorldStructuralModifiers
                 }
             }
 
-            if (worldSettings.mountainsSettings.mountainsEnabled)
+            if (worldSettings.mountainSettings.mountainsEnabled)
             {
                 MountainGenerator mountainGenerator = new(worldSettings, heightMapSettings, meshSettings);
                 MountainStructuralContext mountainContext = mountainGenerator.GenerateContext(resolution, lakeStructuralModifierContext);
@@ -39,9 +39,9 @@ namespace WorldGeneration.WorldStructuralModifiers
                     worldStructure.structuralModifiers.Add(
                         new MountainHeightModifier(
                             cluster,
-                            worldSettings.mountainsSettings.mountainPeakRadius,
-                            worldSettings.mountainsSettings.mountainRidgeWidth,
-                            worldSettings.mountainsSettings.amplificationStrength
+                            worldSettings.mountainSettings.mountainPeakRadius,
+                            worldSettings.mountainSettings.mountainRidgeWidth,
+                            worldSettings.mountainSettings.amplificationStrength
                         )
                     );
                 }
