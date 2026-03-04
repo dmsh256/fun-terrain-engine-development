@@ -288,6 +288,7 @@ public class TerrainChunk
         if (!colliderLod.hasColliderMesh)
             return;
 
+        meshCollider.cookingOptions = MeshColliderCookingOptions.None;
         meshCollider.sharedMesh = colliderLod.colliderMesh;
         hasSetCollider = true;
     }
