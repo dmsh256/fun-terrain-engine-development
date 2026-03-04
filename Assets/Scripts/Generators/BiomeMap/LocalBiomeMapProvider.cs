@@ -15,9 +15,9 @@ namespace Generators.BiomeMap
             this.biomeMap = biomeMap;
         }
 
-        public bool GetBiomeAtWorld(Vector3 localPos, out BiomeData biome)
+        public bool GetBiomeAtWorld(Vector3 localPos, int scale, out BiomeData biome)
         {
-            int biomeIndex = biomeMap.primary[(int)localPos.x, (int)localPos.z];
+            int biomeIndex = biomeMap.primary[(int)localPos.x / scale + 1, (int)localPos.z / scale + 1];
             biome = biomes[biomeIndex];
             
             return true;

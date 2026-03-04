@@ -25,11 +25,12 @@ namespace Generators.Grass
                     TerrainSampler.SampleHeightContinuous(terrainSpawnData, localPosition);
 
                 Vector3 worldPosition =
-                    new Vector3(terrainSpawnData.chunkCoordinates.x * terrainSpawnData.meshSettings.meshWorldSize - 1,
+                    new Vector3(terrainSpawnData.chunkCoordinates.x * terrainSpawnData.meshSettings.meshWorldSize,
                         terrainHeight,
-                        terrainSpawnData.chunkCoordinates.y * terrainSpawnData.meshSettings.meshWorldSize - 1) + localPosition;
+                        terrainSpawnData.chunkCoordinates.y * terrainSpawnData.meshSettings.meshWorldSize) 
+                    + localPosition;
                 
-                if (!biomeProvider.GetBiomeAtWorld(localPosition, out BiomeData biome))
+                if (!biomeProvider.GetBiomeAtWorld(localPosition, terrainSpawnData.meshSettings.meshScale, out BiomeData biome))
                     continue;
 
                 if (!biome.hasGrass)

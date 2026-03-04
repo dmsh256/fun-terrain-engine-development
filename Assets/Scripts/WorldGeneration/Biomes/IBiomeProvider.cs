@@ -5,6 +5,6 @@ namespace WorldGeneration.Biomes
 {
     public interface IBiomeProvider
     {
-        bool GetBiomeAtWorld(Vector3 worldPos, out BiomeData biome);
+        bool GetBiomeAtWorld(Vector3 worldPos, int scale, out BiomeData biome);
     }
 }

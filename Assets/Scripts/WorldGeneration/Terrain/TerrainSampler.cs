@@ -10,13 +10,18 @@ namespace WorldGeneration.Terrain
         {
             try
             {
-                int x0 = Mathf.FloorToInt(position.x);
-                int z0 = Mathf.FloorToInt(position.z);
+                float scale = terrainSpawnData.meshSettings.meshScale;
+
+                float heightMapX = position.x / scale + 1;
+                float heightMapZ = position.z / scale + 1;
+                
+                int x0 = Mathf.FloorToInt(heightMapX);
+                int z0 = Mathf.FloorToInt(heightMapZ);
                 int x1 = x0 + 1;
                 int z1 = z0 + 1;
 
-                float tx = position.x - x0;
-                float tz = position.z - z0;
+                float tx = heightMapX - x0;
+                float tz = heightMapZ - z0;
 
                 float h00 = terrainSpawnData.heightMap.getRawHeight(x0, z0);
                 float h10 = terrainSpawnData.heightMap.getRawHeight(x1, z0);

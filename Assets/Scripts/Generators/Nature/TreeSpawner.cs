@@ -22,11 +22,12 @@ namespace Generators.Nature
                     TerrainSampler.SampleHeightContinuous(objectSpawnContext.terrainSpawnData, localPosition);
                 
                 Vector3 worldPosition =
-                    new Vector3(objectSpawnContext.terrainSpawnData.chunkCoordinates.x * objectSpawnContext.terrainSpawnData.meshSettings.meshWorldSize - 1,
+                    new Vector3(objectSpawnContext.terrainSpawnData.chunkCoordinates.x * objectSpawnContext.terrainSpawnData.meshSettings.meshWorldSize,
                         terrainHeight,
-                        objectSpawnContext.terrainSpawnData.chunkCoordinates.y * objectSpawnContext.terrainSpawnData.meshSettings.meshWorldSize - 1) + localPosition;
+                        objectSpawnContext.terrainSpawnData.chunkCoordinates.y * objectSpawnContext.terrainSpawnData.meshSettings.meshWorldSize) 
+                    + localPosition;
                 
-                if (!objectSpawnContext.biomeProvider.GetBiomeAtWorld(localPosition, out BiomeData biome))
+                if (!objectSpawnContext.biomeProvider.GetBiomeAtWorld(localPosition, objectSpawnContext.terrainSpawnData.meshSettings.meshScale, out BiomeData biome))
                     continue;
 
                 if (!biome.hasTrees)

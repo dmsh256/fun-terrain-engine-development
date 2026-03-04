@@ -65,14 +65,11 @@ namespace Generators.ObjectGenerator
         public void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool visible)
         {
             Vector2 terrainChunkCoordinates = terrainChunk.coordinates;
-
             grassManager.SetVisibility(terrainChunkCoordinates, visible);
-
             if (!visible)
                 return;
 
             Vector2Int chunkCoord = new((int)terrainChunkCoordinates.x, (int)terrainChunkCoordinates.y);
-
             if (!IsWithinRadius(chunkCoord, currentChunkCoord))
                 return;
 
@@ -101,9 +98,7 @@ namespace Generators.ObjectGenerator
             foreach (TerrainChunk terrainChunk in visibleChunks)
             {
                 Vector2 coord = terrainChunk.coordinates;
-                Vector2Int chunkCoord =
-                    new((int)coord.x, (int)coord.y);
-
+                Vector2Int chunkCoord = new((int)coord.x, (int)coord.y);
                 if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
                     continue;
 
