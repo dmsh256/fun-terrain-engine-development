@@ -40,9 +40,9 @@ namespace Generators.BiomeMap
 
             float[] densities = new float[biomes.Length];
 
-            for (int y = 0; y < width; y++)
+            for (int y = 0; y < height; y++)
             {
-                for (int x = 0; x < height; x++)
+                for (int x = 0; x < width; x++)
                 {
                     float worldX = x * step + sampleCentre.x;
                     float worldY = y * step + sampleCentre.y;

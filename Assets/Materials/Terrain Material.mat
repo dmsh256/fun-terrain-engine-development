@@ -92,6 +92,7 @@ Material:
     m_Floats:
     - _BiomeCount: 5
     - _BumpScale: 1
+    - _ChunkSize: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
@@ -127,6 +128,7 @@ Material:
     - testScale: 10.56
     - testTextureScale: 1
     m_Colors:
+    - _ChunkOrigin: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}

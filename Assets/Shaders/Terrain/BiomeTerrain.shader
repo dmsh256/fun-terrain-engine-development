@@ -3,7 +3,8 @@ Shader "Custom/URP/BiomeTerrain"
     Properties
     {
         _BiomeAlbedoArray ("Biome Albedo Array", 2DArray) = "" {}
-        _SplatMap ("Splat Map", 2D) = "white" {}
+        _SplatMap0 ("Splat Map 0", 2D) = "white" {}
+        _SplatMap1 ("Splat Map 1", 2D) = "black" {}
         _TextureScale ("Texture Scale (world)", Float) = 1
     }
 

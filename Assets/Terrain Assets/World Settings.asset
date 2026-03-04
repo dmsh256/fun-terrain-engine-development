@@ -28,4 +28,19 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 24620d6929506ca41b72ace59cb8ba71, type: 2}
   biomeBlending: 0
   waterLevel: 0.0145
-  worldStep: 1
+  canyonSettings:
+    canyonsBetweenLakesEnabled: 1
+    maxConnectionDistance: 2500
+    wiggleFrequency: 0.001
+    wiggleStrengthModifier: 0.005
+    connectionPathSegments: 6
+    trenchWidth: 300
+  mountainsSettings:
+    mountainsEnabled: 1
+    mountainClusterCount: 80
+    mountainMaxRadius: 300
+    mountainMaxHeight: 0.2
+    mountainMinHeight: 0.1
+    mountainPeakRadius: 500
+    mountainRidgeWidth: 200
+    amplificationStrength: 273

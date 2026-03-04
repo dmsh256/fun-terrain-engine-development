@@ -70,11 +70,11 @@ public class TerrainChunk
         
         sampleStartCoordinates = new Vector2(coordinates.x, coordinates.y) * meshSettings.meshWorldSize;
         
-        Vector2 chunkWorldPosition1 = coordinates * meshSettings.meshWorldSize;
+        Vector2 chunkWorldPosition = coordinates * meshSettings.meshWorldSize;
         Vector3 chunkCenter = new (
-            chunkWorldPosition1.x + meshSettings.meshWorldSize * 0.5f,
+            chunkWorldPosition.x + meshSettings.meshWorldSize * 0.5f,
             0f,
-            chunkWorldPosition1.y + meshSettings.meshWorldSize * 0.5f
+            chunkWorldPosition.y + meshSettings.meshWorldSize * 0.5f
         );
         bounds = new Bounds(chunkCenter, new Vector3(meshSettings.meshWorldSize, 0f, meshSettings.meshWorldSize));
         
@@ -86,7 +86,7 @@ public class TerrainChunk
         runtimeMaterial = new Material(material);
         meshRenderer.material = runtimeMaterial;
 
-        meshObject.transform.position = new Vector3(chunkWorldPosition1.x, 0f, chunkWorldPosition1.y);
+        meshObject.transform.position = new Vector3(chunkWorldPosition.x, 0f, chunkWorldPosition.y);
         meshObject.transform.parent = parent;
         SetVisible(false);
         
@@ -146,6 +146,10 @@ public class TerrainChunk
         UpdateTerrainChunk();
         TryUpdateCollisionMesh();
         
+        LODMesh colliderLod = lodMeshes[colliderLODIndex];
+        if (!colliderLod.hasRequestedColliderMesh)
+            colliderLod.RequestColliderMesh(terrainContextMap.heightMap, meshSettings);
+        
         CreateWater(worldSettings.waterMaterial);
     }
     
@@ -155,9 +159,9 @@ public class TerrainChunk
         
         for (int i = 0; i < terrainContextMap.biomeDensityMap.splatMap.Length; i++)
         {
-            Texture2D texture2D = new (resolution, resolution, TextureFormat.RGBA32, false, true);
+            Texture2D texture2D = new (resolution, resolution, TextureFormat.RGBA32, true, true);
             texture2D.wrapMode = TextureWrapMode.Clamp;
-            texture2D.filterMode = FilterMode.Bilinear;
+            texture2D.filterMode = FilterMode.Point;
 
             texture2D.SetPixels(terrainContextMap.biomeDensityMap.splatMap[i]);
             texture2D.Apply();
@@ -200,8 +204,7 @@ public class TerrainChunk
                 if (lodMesh.hasTerrainMesh)
                 {
                     previousLODIndex = lodIndex;
-                    meshFilter.mesh = lodMesh.colliderMesh;
-                    meshCollider.sharedMesh = lodMesh.colliderMesh;
+                    meshFilter.mesh = lodMesh.terrainMesh;
                 }
                 else if (!lodMesh.hasRequestedTerrainMesh)
                 {
@@ -353,6 +356,7 @@ public class TerrainChunk
 internal class LODMesh
 {
     public Mesh colliderMesh;
+    public Mesh terrainMesh;
     
     public bool hasRequestedTerrainMesh;
     public bool hasTerrainMesh;
@@ -370,7 +374,7 @@ internal class LODMesh
 
     private void OnMeshDataReceived(object meshDataObject)
     {
-        colliderMesh = ((MeshData)meshDataObject).CreateMesh();
+        terrainMesh = ((MeshData)meshDataObject).CreateMesh();
         hasTerrainMesh = true;
 
         UpdateCallback?.Invoke();
