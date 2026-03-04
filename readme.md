@@ -18,6 +18,7 @@ Upcoming: cliffs, rivers.
 
 ![snow_cap.png](snow_cap.png)
 
+## Connecting lakes
 ![connections_between_lakes.png](connections_between_lakes.png)
 
 ## List of features:

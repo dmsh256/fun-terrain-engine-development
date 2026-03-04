@@ -27,30 +27,27 @@ namespace Generators.HeightMap.HeightMapModifiers.StructuralModifiers
         
         public float Evaluate(float worldX, float worldZ, float height)
         {
-            Vector2 p = new(worldX, worldZ);
+            Vector2 point = new(worldX, worldZ);
 
             float mask = 0f;
             foreach (MountainGenerator.Peak peak in cluster.peaks)
             {
-                float distance = Vector2.Distance(p, peak.position);
+                float distance = Vector2.Distance(point, peak.position);
                 if (distance > peakRadius)
                     continue;
 
                 float t = 1f - distance / peakRadius;
-                t = Mathf.Pow(t, 3f);
-
-                float slopeNoise = Mathf.PerlinNoise(worldX * 0.003f, worldZ * 0.003f);
+                float slopeNoise = 1f - Mathf.Abs(Mathf.PerlinNoise(worldX * 0.005f, worldZ * 0.005f));
                 float slopeMod = Mathf.Lerp(0.85f, 1.15f, slopeNoise);
                 t *= slopeMod;
 
                 float contribution = t * peak.height;
-                
                 mask = mask + contribution - mask * contribution;
             }
 
             foreach (MountainGenerator.RidgeSpine ridge in cluster.ridges)
             {
-                float distance = DistancePointToSegment(p, ridge.start, ridge.end);
+                float distance = DistancePointToSegment(point, ridge.start, ridge.end);
                 if (distance > ridgeWidth)
                     continue;
 
