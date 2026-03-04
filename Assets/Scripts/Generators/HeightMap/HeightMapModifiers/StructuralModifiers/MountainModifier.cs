@@ -60,9 +60,9 @@ namespace Generators.HeightMap.HeightMapModifiers.StructuralModifiers
             mask = Mathf.Clamp01(mask);
             float landFactor = Mathf.InverseLerp(0.03f, 0.03f + 200f, height);
             mask *= landFactor;
-            float amplifiedHeight = height * (1f + mask * amplificationStrength);
-
-            return amplifiedHeight;
+            float mountainHeight = mask * amplificationStrength;
+            
+            return height + mountainHeight;
         }
         
         private float DistancePointToSegment(Vector2 p, Vector2 a, Vector2 b)

@@ -39,7 +39,7 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
             int resolution, LakeStructuralModifierContext lakeContext = null)
         {
             float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize;
-            float globalWorldStep = worldWidth / (resolution - 1);
+            float step = worldWidth / (resolution - 1);
 
             int clusterCount = worldSettings.mountainsSettings.mountainClusterCount;
 
@@ -57,8 +57,8 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
                         continue;
 
                     Vector2 worldPos = new (
-                        terrainContextMap.sampledFrom.x + x * globalWorldStep,
-                        terrainContextMap.sampledFrom.y + y * globalWorldStep
+                        terrainContextMap.sampledFrom.x + x * step,
+                        terrainContextMap.sampledFrom.y + y * step
                     );
 
                     if (OverlapsCanyon(worldPos, lakeContext))
