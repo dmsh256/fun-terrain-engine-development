@@ -132,7 +132,7 @@ public class TerrainChunk
         
         ThreadedDataRequester.RequestData(
             () => terrainContextMapGenerator.GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
-                heightMapSettings, sampleStartCoordinates, worldSettings.biomes), OnTerrainContextReceived);
+                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, meshSettings.meshScale), OnTerrainContextReceived);
     }
     
     private void OnTerrainContextReceived(object terrainContextObject)

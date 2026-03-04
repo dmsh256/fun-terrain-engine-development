@@ -8,7 +8,7 @@ namespace WorldGeneration.ObjectDistributionStrategies
     {
         public IEnumerable<Vector3> GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float spacing)
         {
-            int resolution = Mathf.RoundToInt(terrainSpawnData.meshSettings.meshWorldSize / spacing);
+            int resolution = Mathf.RoundToInt(terrainSpawnData.meshSettings.meshWorldSize / terrainSpawnData.meshSettings.meshScale / spacing);
 
             System.Random rng = new(
                 seed ^ (terrainSpawnData.chunkCoordinates.x * 73856093)
