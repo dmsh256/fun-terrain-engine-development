@@ -43,4 +43,4 @@ MonoBehaviour:
     mountainMinHeight: 0.1
     mountainPeakRadius: 500
     mountainRidgeWidth: 200
-    amplificationStrength: 273
+    amplificationStrength: 50.5

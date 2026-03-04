@@ -4,7 +4,7 @@ Shader "Custom/URP/BiomeTerrain"
     {
         _BiomeAlbedoArray ("Biome Albedo Array", 2DArray) = "" {}
         _SplatMap0 ("Splat Map 0", 2D) = "white" {}
-        _SplatMap1 ("Splat Map 1", 2D) = "black" {}
+        _SplatMap1 ("Splat Map 1", 2D) = "white" {}
         _TextureScale ("Texture Scale (world)", Float) = 1
     }
 
@@ -93,31 +93,45 @@ Shader "Custom/URP/BiomeTerrain"
                 float soilWeight = smoothstep(0.1, 0.3, slope);
                 float rockWeight = smoothstep(0.15, 0.35, slope);
 
-                int biomeIndex = 0;
+                float biomeWeights[5];
 
-                if      (weights0.r > 0) biomeIndex = 0;
-                else if (weights0.g > 0) biomeIndex = 1;
-                else if (weights0.b > 0) biomeIndex = 2;
-                else if (weights0.a > 0) biomeIndex = 3;
-                else if (weights1.r > 0) biomeIndex = 4;
+                biomeWeights[0] = weights0.r;
+                biomeWeights[1] = weights0.g;
+                biomeWeights[2] = weights0.b;
+                biomeWeights[3] = weights0.a;
+                biomeWeights[4] = weights1.r;
 
-                int baseIndex = biomeIndex * 3;
+                float total = 0;
+                [unroll]
+                for (int b = 0; b < 5; b++)
+                    total += biomeWeights[b];
 
-                half4 soil = SAMPLE_TEXTURE2D_ARRAY(
-                    _BiomeAlbedoArray, sampler_BiomeAlbedoArray,
-                    worldUV, baseIndex + 0);
+                total = max(total, 1e-5);
 
-                half4 grass = SAMPLE_TEXTURE2D_ARRAY(
-                    _BiomeAlbedoArray, sampler_BiomeAlbedoArray,
-                    worldUV, baseIndex + 1);
+                [unroll]
+                for (int b = 0; b < 5; b++)
+                    biomeWeights[b] /= total;
+                                
+                half4 biomeColor = 0;
 
-                half4 rock = SAMPLE_TEXTURE2D_ARRAY(
-                    _BiomeAlbedoArray, sampler_BiomeAlbedoArray,
-                    worldUV, baseIndex + 2);
+                [unroll]
+                for (int b = 0; b < 5; b++)
+                {
+                    float weight = biomeWeights[b];
+                    if (weight <= 1e-4) 
+                        continue;
 
-                half4 biomeColor =
-                    lerp(lerp(grass, soil, soilWeight), rock, rockWeight);
+                    int baseIndex = b * 3;
 
+                    half4 soil  = SAMPLE_TEXTURE2D_ARRAY(_BiomeAlbedoArray, sampler_BiomeAlbedoArray, worldUV, baseIndex + 0);
+                    half4 grass = SAMPLE_TEXTURE2D_ARRAY(_BiomeAlbedoArray, sampler_BiomeAlbedoArray, worldUV, baseIndex + 1);
+                    half4 rock  = SAMPLE_TEXTURE2D_ARRAY(_BiomeAlbedoArray, sampler_BiomeAlbedoArray, worldUV, baseIndex + 2);
+
+                    half4 localColor = lerp(lerp(grass, soil, soilWeight), rock, rockWeight);
+
+                    biomeColor += localColor * weight;
+                }
+                
                 InputData inputData = (InputData)0;
                 inputData.positionWS = i.worldPos;
                 inputData.normalWS = n;

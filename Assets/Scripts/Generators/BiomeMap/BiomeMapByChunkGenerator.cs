@@ -75,7 +75,7 @@ namespace Generators.BiomeMap
                     int splatIndex = bestBiome / 4;
                     int channel    = bestBiome % 4;
 
-                    Color pixel = Color.black;
+                    Color pixel = Color.clear;
                     pixel[channel] = 1f;
                     if (x > 0 && x < width - 1 && y > 0 && y < height - 1) // ignore stitch vertices
                     {

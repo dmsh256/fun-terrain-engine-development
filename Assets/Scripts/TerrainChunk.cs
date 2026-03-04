@@ -161,7 +161,7 @@ public class TerrainChunk
         {
             Texture2D texture2D = new (resolution, resolution, TextureFormat.RGBA32, true, true);
             texture2D.wrapMode = TextureWrapMode.Clamp;
-            texture2D.filterMode = FilterMode.Point;
+            texture2D.filterMode = FilterMode.Bilinear;
 
             texture2D.SetPixels(terrainContextMap.biomeDensityMap.splatMap[i]);
             texture2D.Apply();
