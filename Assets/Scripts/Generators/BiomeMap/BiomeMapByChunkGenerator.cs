@@ -10,42 +10,42 @@ namespace Generators.BiomeMap
     {
         private const float heightBlendRange = 0.01f;
 
-        public BiomeDensityMap GenerateBiomeMap(int width, int height, BiomeData[] biomes, float[,] heightMap, Vector2 sampleCentre,
+        public BiomeDensityMap GenerateBiomeMap(int width, int lenght, float[,] heightMap, Vector2 sampleCentre,
             WorldSettings worldSettings, float step = 1f)
         {
             BiomeDensityMap biomeDensityMap = new()
             {
                 width = width,
-                height = height,
-                primary = new int[width, height],
-                secondary = new int[width, height],
-                dominance = new float[width, height]
+                height = lenght,
+                primary = new int[width, lenght],
+                secondary = new int[width, lenght],
+                dominance = new float[width, lenght]
             };
             
             int splatResolution = width - 2; // TODO cleanup
-            int splatCount = Mathf.CeilToInt(biomes.Length / 4f);
+            int splatCount = Mathf.CeilToInt(worldSettings.biomes.Length / 4f);
             biomeDensityMap.splatMap = new Color[splatCount][];
             for (int i = 0; i < splatCount; i++)
                 biomeDensityMap.splatMap[i] = new Color[splatResolution * splatResolution];
 
             System.Random rng = new(WorldContextSettings.Seed);
 
-            float[] offsetX = new float[biomes.Length];
-            float[] offsetY = new float[biomes.Length];
-            for (int i = 0; i < biomes.Length; i++)
+            float[] offsetX = new float[worldSettings.biomes.Length];
+            float[] offsetY = new float[worldSettings.biomes.Length];
+            for (int i = 0; i < worldSettings.biomes.Length; i++)
             {
                 offsetX[i] = rng.Next(-100000, 100000);
                 offsetY[i] = rng.Next(-100000, 100000);
             }
 
-            float[] densities = new float[biomes.Length];
+            float[] densities = new float[worldSettings.biomes.Length];
 
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < lenght; y++)
             {
                 for (int x = 0; x < width; x++)
                 {
-                    float worldX = x * step + sampleCentre.x;
-                    float worldY = y * step + sampleCentre.y;
+                    float worldX = (x * step + sampleCentre.x) / worldSettings.worldStructureScale;
+                    float worldY = (y * step + sampleCentre.y) / worldSettings.worldStructureScale;
                     
                     float warpX =
                         Noise(worldX * WorldBiomeGenSettings.biomeWarpFrequency + 1000f,
@@ -57,27 +57,26 @@ namespace Generators.BiomeMap
                               worldY * WorldBiomeGenSettings.biomeWarpFrequency + 2000f)
                         * WorldBiomeGenSettings.biomeWarpStrength;
 
-                    float wx = worldX + warpX;
-                    float wy = worldY + warpY;
+                    float warpWorldX = worldX + warpX;
+                    float warpWorldY = worldY + warpY;
 
                     float heightValue = heightMap[x, y];
 
-                    EvaluateBiomeDensities(worldSettings, wx, wy, heightValue, biomes, offsetX, offsetY, densities);
+                    EvaluateBiomeDensities(worldSettings, warpWorldX, warpWorldY, heightValue, worldSettings.biomes, offsetX, offsetY, densities);
                     FindTopTwo(densities, out int bestBiome, out int secondBiome, out float highestDensity, out float secondDensity);
 
                     biomeDensityMap.primary[x, y] = bestBiome;
                     biomeDensityMap.secondary[x, y] = secondBiome;
 
                     float sum = highestDensity + secondDensity;
-                    biomeDensityMap.dominance[x, y] =
-                        sum > 0f ? highestDensity / sum : 1f;
+                    biomeDensityMap.dominance[x, y] = sum > 0f ? highestDensity / sum : 1f;
 
                     int splatIndex = bestBiome / 4;
                     int channel    = bestBiome % 4;
 
                     Color pixel = Color.clear;
                     pixel[channel] = 1f;
-                    if (x > 0 && x < width - 1 && y > 0 && y < height - 1) // ignore stitch vertices
+                    if (x > 0 && x < width - 1 && y > 0 && y < lenght - 1) // ignore stitch vertices
                     {
                         biomeDensityMap.splatMap[splatIndex][(y - 1) * splatResolution + (x - 1)] = pixel;
                     }
@@ -87,7 +86,7 @@ namespace Generators.BiomeMap
             return biomeDensityMap;
         }
         
-        private void EvaluateBiomeDensities(WorldSettings worldSettings, float wx, float wy, float heightValue, BiomeData[] biomes, float[] offsetX, float[] offsetY, float[] densities)
+        private void EvaluateBiomeDensities(WorldSettings worldSettings, float warpWorldX, float warpWorldY, float heightValue, BiomeData[] biomes, float[] offsetX, float[] offsetY, float[] densities)
         {
             float shorelineBlend = WorldBiomeGenSettings.shorelineBlend;
             float waterFactor = Mathf.Clamp01((worldSettings.waterLevel - heightValue) / shorelineBlend);
@@ -113,16 +112,14 @@ namespace Generators.BiomeMap
                     continue;
                 }
 
-                float biomeNoise =
-                    Noise(wx * WorldBiomeGenSettings.biomeFieldFrequency + offsetX[i],
-                        wy * WorldBiomeGenSettings.biomeFieldFrequency + offsetY[i]);
+                float biomeNoise = Noise(warpWorldX * WorldBiomeGenSettings.biomeFieldFrequency + offsetX[i],
+                        warpWorldY * WorldBiomeGenSettings.biomeFieldFrequency + offsetY[i]);
 
                 float density = biomeNoise * biome.globalWeight * heightFactor;
-
                 if (biome.isWater)
                     density *= waterFactor;
                 else
-                    density *= (1f - waterFactor);
+                    density *= 1f - waterFactor;
 
                 densities[i] = Mathf.Max(0f, density);
             }
@@ -158,8 +155,13 @@ namespace Generators.BiomeMap
                 }
             }
 
-            if (secondBiome == -1) 
+            if (bestBiome == -1)
+            {
+                bestBiome = 0;
+                secondBiome = 0;
+                highest = 1f;
                 second = 0f;
+            }
         }
 
         private static float Noise(float x, float y)

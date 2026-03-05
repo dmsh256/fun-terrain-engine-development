@@ -45,13 +45,13 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
             float step = terrainContextMap.sampledWithStep;
             
             bool[,] waterMask = BuildWaterMask(terrainContextMap.heightMap, worldSettings.waterLevel);
-            bool[,] oceanVisited = new bool[resolution, resolution];
+            bool[,] oceanVisited = new bool[terrainContextMap.heightMap.values.GetLength(0), terrainContextMap.heightMap.values.GetLength(1)];
             
             FloodFillOcean(waterMask, oceanVisited);
             List<LakeData> lakes = ExtractBasins(waterMask, oceanVisited, step, terrainContextMap.sampledFrom);
             List<LakeConnection> connections = BuildCanyonConnections(lakes);
             List<CanyonPath> canyonPaths = BuildCanyonPaths(lakes, connections, totalWorldSize);
-            
+            Debug.Log(canyonPaths.Count);
             return new LakeStructuralModifierContext
             {
                 canyonPaths = canyonPaths,
@@ -162,7 +162,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
 
             for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
-                waterCells[x, y] = heightMap.getRawHeight(x, y) < waterLevel;
+                waterCells[x, y] = heightMap.GetRawHeight(x, y) < waterLevel;
             
             return waterCells;
         }

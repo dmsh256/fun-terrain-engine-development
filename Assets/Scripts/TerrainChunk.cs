@@ -112,7 +112,7 @@ public class TerrainChunk
     
     public void LoadAsync()
     {
-        TerrainContextMapGenerator terrainContextMapGenerator = new(worldSettings);
+        TerrainContextMapGenerator terrainContextMapGenerator = new(worldSettings, meshSettings);
         
         List<IHeightMapModifier> effectiveModifiers = new();
         foreach (IHeightMapModifier modifier in worldHeightModifiers)
@@ -130,9 +130,9 @@ public class TerrainChunk
         }
         terrainContextMapGenerator.SetStructuralModifiers(effectiveStructuralModifiers);
         
-        ThreadedDataRequester.RequestData(
-            () => terrainContextMapGenerator.GenerateTerrainContextMap(meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine,
-                heightMapSettings, sampleStartCoordinates, worldSettings.biomes, meshSettings.meshScale), OnTerrainContextReceived);
+        ThreadedDataRequester.RequestData(() => terrainContextMapGenerator.GenerateTerrainContextMap(
+                meshSettings.numVerticesPerLine, meshSettings.numVerticesPerLine, heightMapSettings, sampleStartCoordinates, meshSettings.meshScale),
+            OnTerrainContextReceived);
     }
     
     private void OnTerrainContextReceived(object terrainContextObject)
@@ -327,8 +327,8 @@ public class TerrainChunk
 
     private void CreateWater(Material material)
     {
-        float waterLevel = worldSettings.waterLevel * terrainContextMap.heightMap.getHeightMultiplier();
-        if (terrainContextMap.heightMap.getMinHeightValue() > waterLevel)
+        float waterLevel = worldSettings.waterLevel * terrainContextMap.heightMap.GetHeightMultiplier();
+        if (terrainContextMap.heightMap.GetMinHeightValue() > waterLevel)
             return;
         
         waterObject = GameObject.CreatePrimitive(PrimitiveType.Plane);

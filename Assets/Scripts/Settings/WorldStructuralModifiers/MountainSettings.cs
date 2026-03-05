@@ -18,7 +18,7 @@ namespace Settings.WorldStructuralModifiers
         public float mountainPeakRadius;
         public float mountainRidgeWidth;
         
-        [Range(1, 100)]
+        [Range(1, 500)]
         public float amplificationStrength = 1f;
     }
 }

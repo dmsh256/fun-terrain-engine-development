@@ -19,7 +19,10 @@ namespace Settings
         
         [Header("Size in chunks")]
         public int worldSizeInChunksX;
-        public int worldSizeInChunksY;
+        public int worldSizeInChunksY => worldSizeInChunksX;
+        
+        [Header("How large are the world structures")]
+        public float worldStructureScale = 1f;
         
         [Header("Materials")]
         public Material borderMaterial; // TODO move somewhere

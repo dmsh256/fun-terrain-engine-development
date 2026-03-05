@@ -7,7 +7,7 @@ namespace Generators.BiomeMap
 {
     public interface IBiomeMapGenerator
     {
-        BiomeDensityMap GenerateBiomeMap(int width, int height, BiomeData[] biomes, float[,] structuralHeightMap, 
+        BiomeDensityMap GenerateBiomeMap(int width, int lenght, float[,] structuralHeightMap, 
             Vector2 sampleCentre, WorldSettings worldSettings, float step = 1f)
         {
             return new BiomeDensityMap();

@@ -17,12 +17,25 @@ MonoBehaviour:
   globalWeight: 1
   minHeight: 0.6
   maxHeight: 100
+  isWater: 0
   terrainShaper: {fileID: 11400000, guid: 8e479c8091878df43a01456a9259ac72, type: 2}
   soilTexture: {fileID: 2800000, guid: 101a9e33bf80c9a488682f5ac74d4c85, type: 3}
   grassTexture: {fileID: 2800000, guid: 64a59da30a7ec3b4385e032488923521, type: 3}
   rockTexture: {fileID: 2800000, guid: f736fa6fbd1feef47aeb662d5de58056, type: 3}
-  hasTrees: 0
-  trees: []
+  hasTrees: 1
+  trees:
+  - prefab: {fileID: 5947270739854247876, guid: c4a4f30587874e74583733529c3698cb,
+      type: 3}
+    density: 0.198
+    yOffset: -0.52
+    scaleMin: 1
+    scaleMax: 1.5
+  - prefab: {fileID: 5947270739854247876, guid: c4a4f30587874e74583733529c3698cb,
+      type: 3}
+    density: 0.198
+    yOffset: -0.52
+    scaleMin: 1
+    scaleMax: 1.5
   hasRocks: 1
   rocks:
   - prefab: {fileID: 919132149155446097, guid: 3ec7a8ba543dad447adad5c3326d1955, type: 3}
@@ -43,4 +56,3 @@ MonoBehaviour:
   hasGrass: 0
   grassDensity: 0
   grassVariants: []
-  isWater: 0

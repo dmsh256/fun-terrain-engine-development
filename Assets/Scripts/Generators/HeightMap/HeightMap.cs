@@ -15,27 +15,27 @@ namespace Generators.HeightMap
             this.heightMultiplier = heightMultiplier;
         }
         
-        public float getHeight(int x, int y)
+        public float GetHeight(int x, int y)
         {
             return values[x, y] * heightMultiplier;
         }
         
-        public float getRawHeight(int x, int y)
+        public float GetRawHeight(int x, int y)
         {
             return values[x, y];
         }
 
-        public float getHeightMultiplier()
+        public float GetHeightMultiplier()
         {
             return heightMultiplier; 
         }
         
-        public float getMinHeightValue()
+        public float GetMinHeightValue()
         {
             return minValue; 
         }
         
-        public float getMaxHeightValue()
+        public float GetMaxHeightValue()
         {
             return maxValue; 
         }

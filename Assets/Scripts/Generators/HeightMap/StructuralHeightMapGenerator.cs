@@ -17,7 +17,7 @@ namespace Generators.HeightMap
         private List<IStructuralHeightModifier> structuralModifiersList = new ();
 
         public float[,] GenerateStructuralHeightMap(int width, int length, HeightMapSettings heightMapSettings, 
-            Vector2 sampleCentre, List<IStructuralHeightModifier> structuralModifiers = null, float step = 1f)
+            Vector2 sampleCentre, List<IStructuralHeightModifier> structuralModifiers = null, float step = 1f, float scale = 1f)
         {
             if (heightMapSettings.layers == null || heightMapSettings.layers.Count == 0)
                 throw new Exception("No noise layers defined.");
@@ -52,7 +52,7 @@ namespace Generators.HeightMap
             float[,] maskValues = null;
 
             if (maskSource != null)
-                maskValues = maskSource.Generate(width, length, sampleCentre, step);
+                maskValues = maskSource.Generate(width, length, sampleCentre, step, scale);
 
             bool useCurve = heightMapSettings.useHeightCurve;
             AnimationCurve curve = null;
@@ -61,7 +61,7 @@ namespace Generators.HeightMap
             
             foreach ((INoiseSource noiseSource, NoiseLayer noiseLayer) in noiseSources)
             {
-                float[,] heightValues = noiseSource.Generate(width, length, sampleCentre, step);
+                float[,] heightValues = noiseSource.Generate(width, length, sampleCentre, step, scale);
                 float maskMin = maskLayer.maskSmoothRange.x;
                 float maskMax = maskLayer.maskSmoothRange.y;
                 for (int y = 0; y < length; y++)

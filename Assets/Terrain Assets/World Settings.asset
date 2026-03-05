@@ -17,7 +17,7 @@ MonoBehaviour:
   useRandomSeed: 0
   worldName: Stolen Sun
   worldSizeInChunksX: 40
-  worldSizeInChunksY: 40
+  worldStructureScale: 2
   borderMaterial: {fileID: 2100000, guid: d94e2146348e95e41a3afee7d025b689, type: 2}
   waterMaterial: {fileID: 2100000, guid: 1254d6fb20454904c9950beea3c9f179, type: 2}
   biomes:
@@ -33,14 +33,14 @@ MonoBehaviour:
     maxConnectionDistance: 2500
     wiggleFrequency: 0.001
     wiggleStrengthModifier: 0.005
-    connectionPathSegments: 6
+    connectionPathSegments: 10
     trenchWidth: 300
-  mountainsSettings:
+  mountainSettings:
     mountainsEnabled: 1
-    mountainClusterCount: 80
-    mountainMaxRadius: 300
-    mountainMaxHeight: 0.2
-    mountainMinHeight: 0.1
+    mountainClusterCount: 30
+    mountainMaxRadius: 500
+    mountainMaxHeight: 1.5
+    mountainMinHeight: 0.5
     mountainPeakRadius: 500
-    mountainRidgeWidth: 200
-    amplificationStrength: 50.5
+    mountainRidgeWidth: 500
+    amplificationStrength: 180

@@ -12,10 +12,10 @@ namespace Generators.Noise.NoiseSource
             this.noiseSettings = noiseSettings;
         }
 
-        public float[,] Generate(int width, int height, Vector2 sampleCentre, float step)
+        public float[,] Generate(int width, int height, Vector2 sampleCentre, float step, float scale)
         {
             return SimplexNoiseGenerator.GenerateNoiseMap(
-                width, height, noiseSettings, sampleCentre, step
+                width, height, noiseSettings, sampleCentre, step, scale
             );
         }
     }

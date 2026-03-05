@@ -15,6 +15,6 @@ MonoBehaviour:
   autoUpdate: 1
   numOfOutOfMeshVertices: 2
   meshScale: 1
+  vertexSizeIndex: 3
   useFlatShading: 0
-  chunkSizeIndex: 2
   flatShadedChunkSizeIndex: 0

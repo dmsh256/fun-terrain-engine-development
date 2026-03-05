@@ -4,6 +4,6 @@ namespace Generators.Noise.NoiseSource
 {
     public interface INoiseSource
     {
-        float[,] Generate(int width, int height, Vector2 sampleCentre, float step);
+        float[,] Generate(int width, int height, Vector2 sampleCentre, float step, float scale = 1f);
     }
 }

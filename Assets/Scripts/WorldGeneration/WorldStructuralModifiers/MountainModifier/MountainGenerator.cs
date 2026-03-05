@@ -12,8 +12,6 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
         private readonly WorldSettings worldSettings;
         private readonly HeightMapSettings heightMapSettings;
         private readonly MeshSettings meshSettings;
-
-        private const int distanceFromCoast = 50;
         
         public MountainGenerator(WorldSettings worldSettings, HeightMapSettings heightMapSettings, MeshSettings meshSettings)
         {
@@ -29,18 +27,15 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
             TerrainContextMapLowResSampler terrainContextMapLowResSampler = new(worldSettings, heightMapSettings, meshSettings);
             TerrainContextMap terrainContextMap = terrainContextMapLowResSampler.GetTerrainContextMapLowRes(resolution);
 
-            GenerateClusters(mountainStructuralContext, terrainContextMap, resolution, lakeContext);
+            GenerateClusters(mountainStructuralContext, terrainContextMap, lakeContext);
             GenerateRidges(mountainStructuralContext);
 
             return mountainStructuralContext;
         }
         
         private void GenerateClusters(MountainStructuralContext mountainStructuralContext, TerrainContextMap terrainContextMap,
-            int resolution, LakeStructuralModifierContext lakeContext = null)
+            LakeStructuralModifierContext lakeContext = null)
         {
-            float worldWidth = worldSettings.worldSizeInChunksX * meshSettings.meshWorldSize;
-            float step = worldWidth / (resolution - 1);
-
             int clusterCount = worldSettings.mountainSettings.mountainClusterCount;
 
             int width = terrainContextMap.heightMap.values.GetLength(0);
@@ -52,13 +47,13 @@ namespace WorldGeneration.WorldStructuralModifiers.MountainModifier
             {
                 for (int y = 0; y < height; y++)
                 {
-                    float rawHeight = terrainContextMap.heightMap.getRawHeight(x, y);
-                    if (rawHeight <= worldSettings.waterLevel + distanceFromCoast)
+                    float rawHeight = terrainContextMap.heightMap.GetRawHeight(x, y);
+                    if (rawHeight <= worldSettings.waterLevel)
                         continue;
 
                     Vector2 worldPos = new (
-                        terrainContextMap.sampledFrom.x + x * step,
-                        terrainContextMap.sampledFrom.y + y * step
+                        terrainContextMap.sampledFrom.x + x * terrainContextMap.sampledWithStep,
+                        terrainContextMap.sampledFrom.y + y * terrainContextMap.sampledWithStep
                     );
 
                     if (OverlapsCanyon(worldPos, lakeContext))

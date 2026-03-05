@@ -3,7 +3,6 @@ using Generators.BiomeMap;
 using Settings;
 using Settings.Biome;
 using UnityEngine;
-using WorldGeneration;
 using WorldGeneration.Biomes;
 using WorldGeneration.WorldStructuralModifiers;
 
@@ -23,12 +22,15 @@ namespace Generators.HeightMap
         private readonly StructuralHeightMapGenerator structuralHeightMapGenerator = new();
         private readonly HeightMapProcessor heightMapProcessor = new();
         private readonly WorldSettings worldSettings;
+        private readonly MeshSettings meshSettings;
         private List<IStructuralHeightModifier> structuralHeightModifiersList;
         private List<IHeightMapModifier> heightModifiersList;
         
-        public TerrainContextMapGenerator(WorldSettings worldSettings)
+        public TerrainContextMapGenerator(WorldSettings worldSettings, MeshSettings meshSettings)
         {
             this.worldSettings = worldSettings;
+            this.meshSettings = meshSettings;
+            
             biomeGenerator = BiomeGeneratorFactory.GetBiomeMapGenerator(worldSettings);
         }
 
@@ -42,21 +44,22 @@ namespace Generators.HeightMap
             heightModifiersList = heightModifiers;
         }
         
-        public TerrainContextMap GenerateTerrainContextMap(int width, int length, HeightMapSettings heightMapSettings, 
-            Vector2 sampleCentre, BiomeData[] biomes, float step = 1f)
+        public TerrainContextMap GenerateTerrainContextMap(int width, int length, HeightMapSettings heightMapSettings, Vector2 sampleCentre, float sampleStep = 1f)
         {
             float[,] structuralHeight = 
-                structuralHeightMapGenerator.GenerateStructuralHeightMap(width, length, heightMapSettings, sampleCentre, 
-                    structuralHeightModifiersList, step);
+                structuralHeightMapGenerator.GenerateStructuralHeightMap(width, 
+                    length, heightMapSettings, sampleCentre, 
+                    structuralHeightModifiersList, sampleStep, worldSettings.worldStructureScale);
 
             BiomeDensityMap biomeDensityMap =
-                biomeGenerator.GenerateBiomeMap(width, length, biomes, structuralHeight, sampleCentre, worldSettings, step);
+                biomeGenerator.GenerateBiomeMap(width, length, structuralHeight, sampleCentre, worldSettings, 
+                    sampleStep);
             
             heightMapProcessor.SetHeightModifiers(heightModifiersList);
 
             TerrainContextMap terrainContextMap 
                 = heightMapProcessor.ProcessHeight(structuralHeight, heightMapSettings, 
-                    sampleCentre, step, biomeDensityMap, biomes);
+                    sampleCentre, sampleStep, biomeDensityMap, worldSettings.biomes);
             
             return terrainContextMap;
         }

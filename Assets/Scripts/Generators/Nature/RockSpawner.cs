@@ -10,7 +10,7 @@ namespace Generators.Nature
 {
     public class RockSpawner : INatureObjectSpawner
     {
-        private const float maxLeanAngle = 12f;
+        private const float maxLeanAngle = 24f;
 
         public IEnumerable<GameObject> Spawn(ObjectSpawnContext objectSpawnContext, IObjectDistributionStrategy objectDistributionStrategy,
             int seed, float spacing = 6f)

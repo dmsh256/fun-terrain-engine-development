@@ -58,7 +58,7 @@ namespace WorldGeneration.Biomes
                     float wx = fx + warpX;
                     float wy = fy + warpY;
 
-                    float heightValue = heightMap.getHeight(x, y);
+                    float heightValue = heightMap.GetHeight(x, y);
                     for (int i = 0; i < biomes.Length; i++)
                     {
                         BiomeData biome = biomes[i];
