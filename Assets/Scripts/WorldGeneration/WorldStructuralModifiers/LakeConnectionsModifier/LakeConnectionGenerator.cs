@@ -51,7 +51,7 @@ namespace WorldGeneration.WorldStructuralModifiers.LakeConnectionsModifier
             List<LakeData> lakes = ExtractBasins(waterMask, oceanVisited, step, terrainContextMap.sampledFrom);
             List<LakeConnection> connections = BuildCanyonConnections(lakes);
             List<CanyonPath> canyonPaths = BuildCanyonPaths(lakes, connections, totalWorldSize);
-            Debug.Log(canyonPaths.Count);
+
             return new LakeStructuralModifierContext
             {
                 canyonPaths = canyonPaths,

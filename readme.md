@@ -1,4 +1,4 @@
-
+This repo does not include any prefabs anf textures. Please, use your own.
 
 Upcoming: cliffs, rivers.
 
@@ -20,6 +20,9 @@ Upcoming: cliffs, rivers.
 
 ## Connecting lakes
 ![connections_between_lakes.png](connections_between_lakes.png)
+
+## Just a nice view
+![trees_and_fog.png](trees_and_fog.png)
 
 ## List of features:
 ### 1. Procedural Heightmap Generation (Layered Noise System)
