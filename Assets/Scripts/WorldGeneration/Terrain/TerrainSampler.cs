@@ -48,16 +48,20 @@ namespace WorldGeneration.Terrain
             float px = Mathf.Clamp(position.x, spacing, terrainSpawnData.meshSettings.meshWorldSize - spacing);
             float pz = Mathf.Clamp(position.z, spacing, terrainSpawnData.meshSettings.meshWorldSize - spacing);
 
-            Vector3 p = new (px, 0f, pz);
-            float hL = SampleHeightContinuous(terrainSpawnData, p + new Vector3(-spacing, 0f, 0f));
-            float hR = SampleHeightContinuous(terrainSpawnData, p + new Vector3( spacing, 0f, 0f));
-            float hD = SampleHeightContinuous(terrainSpawnData, p + new Vector3( 0f, 0f,-spacing));
-            float hU = SampleHeightContinuous(terrainSpawnData, p + new Vector3( 0f, 0f, spacing));
+            float hL = SampleHeightContinuous(terrainSpawnData, new Vector3(px - spacing, 0f, pz));
+            float hR = SampleHeightContinuous(terrainSpawnData, new Vector3(px + spacing, 0f, pz));
+            float hD = SampleHeightContinuous(terrainSpawnData, new Vector3(px, 0f, pz - spacing));
+            float hU = SampleHeightContinuous(terrainSpawnData, new Vector3(px, 0f, pz + spacing));
 
-            float dX = (hR - hL) / (2f * spacing);
-            float dZ = (hU - hD) / (2f * spacing);
+            float dX = (hR - hL) * 0.5f;
+            float dZ = (hU - hD) * 0.5f;
 
-            return new Vector3(-dX, 1f, -dZ).normalized;
+            Vector3 normal;
+            normal.x = -dX;
+            normal.y = 1f;
+            normal.z = -dZ;
+
+            return normal.normalized;
         }
         
         public static class TerrainRaycastSampler

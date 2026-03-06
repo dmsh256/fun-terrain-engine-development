@@ -7,7 +7,7 @@ namespace Generators.Nature
 {
     public interface INatureObjectSpawner
     {
-        IEnumerable<GameObject> Spawn(ObjectSpawnContext objectSpawnContext, IObjectDistributionStrategy objectDistributionStrategy,
-            int seed, float spacing = 6f);
+        void Spawn(ObjectSpawnContext objectSpawnContext, IObjectDistributionStrategy objectDistributionStrategy,
+            int seed, System.Action<GameObject> emit, float spacing = 6f);
     }
 }

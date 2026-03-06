@@ -6,6 +6,6 @@ namespace WorldGeneration.ObjectDistributionStrategies
 {
     public interface IObjectDistributionStrategy
     {
-        IEnumerable<Vector3> GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float spacing);
+        void GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float spacing, List<Vector3> buffer);
     }
 }

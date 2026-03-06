@@ -17,6 +17,9 @@ namespace Managers.Grass
         private readonly MeshSettings meshSettings;
         private readonly Mesh fallbackMesh;
         private readonly Material fallbackMaterial;
+        
+        private IObjectDistributionStrategy objectDistributionStrategy => new JitteredGridDistribution(); // TODO inject from somewhere
+        private GrassChunkGenerator grassChunkGenerator => new ();
 
         public GrassChunkManager(GrassIndirectRenderer grassRenderer, MeshSettings meshSettings, Mesh fallbackMesh, Material fallbackMaterial)
         {
@@ -37,10 +40,10 @@ namespace Managers.Grass
                 terrainChunk.terrainContextMap.heightMap,
                 terrainChunk.terrainLayerMask);
 
-            GrassChunk grassChunk = GrassChunkGenerator.Generate(
+            GrassChunk grassChunk = grassChunkGenerator.Generate(
                 terrainSpawnData,
                 biomeProvider,
-                new JitteredGridDistribution(), // TODO inject from somewhere
+                objectDistributionStrategy, 
                 WorldContextSettings.Seed,
                 fallbackMesh: fallbackMesh,
                 fallbackMaterial: fallbackMaterial);

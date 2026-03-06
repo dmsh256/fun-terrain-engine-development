@@ -6,7 +6,7 @@ namespace WorldGeneration.ObjectDistributionStrategies
 {
     public class JitteredGridDistribution : IObjectDistributionStrategy
     {
-        public IEnumerable<Vector3> GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float spacing)
+        public void GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float spacing, List<Vector3> positions)
         {
             int resolution = Mathf.RoundToInt(terrainSpawnData.meshSettings.meshWorldSize / spacing);
 
@@ -27,7 +27,7 @@ namespace WorldGeneration.ObjectDistributionStrategies
                     gridZ * spacing + jitterZ
                 );
 
-                yield return localOffset;
+                positions.Add(localOffset);
             }
         }
     }

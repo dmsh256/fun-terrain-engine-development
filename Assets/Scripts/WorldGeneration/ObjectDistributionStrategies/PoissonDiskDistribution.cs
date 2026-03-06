@@ -8,7 +8,7 @@ namespace WorldGeneration.ObjectDistributionStrategies
     {
         private const int k = 30;
 
-        public IEnumerable<Vector3> GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float minDistance)
+        public void GeneratePositions(TerrainSpawnData terrainSpawnData, int seed, float minDistance, List<Vector3> positions)
         {
             float chunkSize = terrainSpawnData.meshSettings.meshWorldSize;
             Vector2 chunkOrigin = new(0, 0);
@@ -88,10 +88,10 @@ namespace WorldGeneration.ObjectDistributionStrategies
             
             foreach (Vector2 p in points)
             {
-                yield return new Vector3(
+                positions.Add(new Vector3(
                     chunkOrigin.x + p.x,
                     0f,
-                    chunkOrigin.y + p.y
+                    chunkOrigin.y + p.y)
                 );
             }
         }

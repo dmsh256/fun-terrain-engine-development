@@ -73,7 +73,7 @@ namespace Managers.Chunks
                     break;
 
                 ObjectChunk chunk = chunksSpawning[i];
-                int spawned = chunk.SpawnStep(remainingBudget);
+                int spawned = chunk.SpawnGradually(remainingBudget);
 
                 remainingBudget -= spawned;
 

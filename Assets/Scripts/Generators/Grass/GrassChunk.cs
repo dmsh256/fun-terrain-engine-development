@@ -6,8 +6,8 @@ namespace Generators.Grass
 {
     public class GrassChunk
     {
-        private readonly Dictionary<GrassRenderKey, GrassRenderBatch> batchesByRender = new();
-        private readonly List<GrassRenderBatch> batches = new();
+        private readonly Dictionary<GrassRenderKey, GrassRenderBatch> batchesByRender = new(16);
+        private readonly List<GrassRenderBatch> batches = new(16);
         
         private ComputeBuffer matrixBuffer;
         private ComputeBuffer argsBuffer;
@@ -39,15 +39,14 @@ namespace Generators.Grass
             );
 
             batch.matrices.Add(matrix);
-            Vector3 pos = matrix.GetColumn(3);
             if (!hasBounds)
             {
-                bounds = new Bounds(pos, Vector3.zero);
+                bounds = new Bounds(instance.position, Vector3.zero);
                 hasBounds = true;
             }
             else
             {
-                bounds.Encapsulate(pos);
+                bounds.Encapsulate(instance.position);
             }
         }
 
@@ -93,11 +92,6 @@ namespace Generators.Grass
             public bool Equals(GrassRenderKey other)
             {
                 return ReferenceEquals(mesh, other.mesh) && ReferenceEquals(material, other.material);
-            }
-
-            public override bool Equals(object obj)
-            {
-                return obj is GrassRenderKey other && Equals(other);
             }
 
             public override int GetHashCode()

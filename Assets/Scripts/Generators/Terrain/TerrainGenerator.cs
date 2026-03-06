@@ -47,6 +47,7 @@ namespace Generators.Terrain
 
         private readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new ();
         private readonly List<TerrainChunk> visibleTerrainChunks = new ();
+        private HashSet<Vector2> alreadyUpdatedChunkCoords = new();
         
         [SerializeField]
         private LayerMask layerMask;
@@ -58,7 +59,6 @@ namespace Generators.Terrain
         private bool waitingForBootstrap = true;
         
         private WorldBorderGenerator worldBorderGenerator;
-
         private WorldStructure worldStructure;
         
         public void Start()
@@ -126,7 +126,7 @@ namespace Generators.Terrain
 
         private void UpdateOrCreateVisibleChunks()
         {
-            HashSet<Vector2> alreadyUpdatedChunkCoords = new();
+            alreadyUpdatedChunkCoords.Clear();
 
             for (int i = visibleTerrainChunks.Count - 1; i >= 0; i--)
             {
@@ -139,14 +139,14 @@ namespace Generators.Terrain
             
             Vector2Int chunkCoordinates = new(currentChunkCoordX, currentChunkCoordY);
             
-            DoCreateOrUpdateChunks(currentChunkCoordX, currentChunkCoordY, alreadyUpdatedChunkCoords);
+            DoCreateOrUpdateChunks(currentChunkCoordX, currentChunkCoordY);
 
             UpdateCollisionChunks(currentChunkCoordX, currentChunkCoordY);
             objectLifecycleController?.UpdateLoadedChunks(chunkCoordinates, visibleTerrainChunks);
             objectLifecycleController?.SetCurrentChunk(chunkCoordinates);
         }
 
-        private void DoCreateOrUpdateChunks(int currentChunkCoordX, int currentChunkCoordY, HashSet<Vector2> alreadyUpdatedChunkCoords)
+        private void DoCreateOrUpdateChunks(int currentChunkCoordX, int currentChunkCoordY)
         {
             List<Vector2Int> candidateCoords = new();
             for (int y = -chunksVisibleInViewDst; y <= chunksVisibleInViewDst; y++)

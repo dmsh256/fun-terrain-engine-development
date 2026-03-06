@@ -5,9 +5,10 @@ namespace Generators.Grass
 {
     public class GrassRenderBatch
     {
+        private static readonly int InstanceMatrices = Shader.PropertyToID("_InstanceMatrices");
         private readonly Mesh mesh;
         private Material material;
-        public readonly List<Matrix4x4> matrices = new();
+        public readonly List<Matrix4x4> matrices = new(4096);
 
         private ComputeBuffer matrixBuffer;
         private ComputeBuffer argsBuffer;
@@ -40,7 +41,7 @@ namespace Generators.Grass
             {
                 enableInstancing = true
             };
-            material.SetBuffer("_InstanceMatrices", matrixBuffer);
+            material.SetBuffer(InstanceMatrices, matrixBuffer);
         }
 
         public void Draw(Bounds bounds)

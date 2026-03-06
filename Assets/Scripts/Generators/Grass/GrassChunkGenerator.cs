@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Settings.Biome;
 using UnityEngine;
 using WorldGeneration.Biomes;
@@ -6,21 +7,37 @@ using WorldGeneration.Terrain;
 
 namespace Generators.Grass
 {
-    public static class GrassChunkGenerator
+    public class GrassChunkGenerator
     {
         private const float maxGrassLeanAngle = 12f;
-
-        public static GrassChunk Generate(TerrainSpawnData terrainSpawnData, IBiomeProvider biomeProvider,
+        private const float maxSlopeAngle = 35f;
+        private readonly List<Vector3> positions = new(2048);
+        private System.Random random = new();
+        
+        public GrassChunk Generate(TerrainSpawnData terrainSpawnData, IBiomeProvider biomeProvider,
             IObjectDistributionStrategy objectDistributionStrategy, int seed, float spacing = 1f,
             Mesh fallbackMesh = null, Material fallbackMaterial = null)
         {
             GrassChunk chunk = new();
             int chunkSeed = seed ^ (terrainSpawnData.chunkCoordinates.x * 73856093) ^ (terrainSpawnData.chunkCoordinates.y * 19349663);
-            System.Random rng = new(chunkSeed);
+            random = new System.Random(chunkSeed);
 
-            foreach (Vector3 localPosition in
-                     objectDistributionStrategy.GeneratePositions(terrainSpawnData, seed, spacing))
+            positions.Clear();
+            objectDistributionStrategy.GeneratePositions(terrainSpawnData, seed, spacing, positions);
+            for (int i = 0;  i < positions.Count; i++)
             {
+                Vector3 localPosition = positions[i];
+                
+                if (!biomeProvider.GetBiomeAtWorld(localPosition, terrainSpawnData.meshSettings.meshScale, out BiomeData biome))
+                    continue;
+             
+                if (!biome.hasGrass)
+                    continue;
+                 
+                float densityNoise = Mathf.PerlinNoise(localPosition.x * 0.05f, localPosition.z * 0.05f);
+                if (densityNoise < biome.grassDensity)
+                    continue;
+                
                 float terrainHeight =
                     TerrainSampler.SampleHeightContinuous(terrainSpawnData, localPosition);
 
@@ -29,18 +46,8 @@ namespace Generators.Grass
                         terrainHeight,
                         terrainSpawnData.chunkCoordinates.y * terrainSpawnData.meshSettings.meshWorldSize) 
                     + localPosition;
-                
-                if (!biomeProvider.GetBiomeAtWorld(localPosition, terrainSpawnData.meshSettings.meshScale, out BiomeData biome))
-                    continue;
 
-                if (!biome.hasGrass)
-                    continue;
-
-                float densityNoise = Mathf.PerlinNoise(localPosition.x * 0.05f, localPosition.z * 0.05f);
-                if (densityNoise < biome.grassDensity)
-                    continue;
-
-                if (!TryPickVariant(biome.grassVariants, rng, out BiomeGrassVariant grassVariant))
+                if (!TryPickVariant(biome.grassVariants, random, out BiomeGrassVariant grassVariant))
                 {
                     if (!fallbackMesh || !fallbackMaterial)
                         continue;
@@ -56,12 +63,10 @@ namespace Generators.Grass
 
                 Vector3 terrainNormal = TerrainSampler.SampleNormalContinuous(terrainSpawnData, localPosition); 
                 float slopeAngle = Vector3.Angle(Vector3.up, terrainNormal);
-               
-                if (slopeAngle > 35f)
+                if (slopeAngle > maxSlopeAngle)
                     continue;
 
                 float leanAngle = Mathf.Min(slopeAngle, maxGrassLeanAngle);
-
                 Vector3 leanAxis = Vector3.Cross(Vector3.up, terrainNormal);
                 if (leanAxis.sqrMagnitude < 1e-6f)
                     leanAxis = Vector3.forward;
@@ -70,17 +75,15 @@ namespace Generators.Grass
 
                 Quaternion leanRotation = Quaternion.AngleAxis(leanAngle, leanAxis);
                 Quaternion randomYaw =
-                    Quaternion.Euler(0f, (float)rng.NextDouble() * 360f, 0f);
+                    Quaternion.Euler(0f, (float)random.NextDouble() * 360f, 0f);
 
                 Quaternion finalRotation = leanRotation * randomYaw;
 
+                Vector3 position = worldPosition;
+                position.y = terrainHeight + grassVariant.yOffset;
                 chunk.AddInstance(grassVariant.mesh, grassVariant.material, new GrassInstance
                 {
-                    position = new Vector3(
-                        worldPosition.x, 
-                        terrainHeight + grassVariant.yOffset,
-                        worldPosition.z
-                    ),
+                    position = position,
                     rotation = finalRotation,
                     scale = Mathf.Lerp(0.8f, 1.2f, densityNoise) * Mathf.Max(0.01f, grassVariant.scale),
                 });

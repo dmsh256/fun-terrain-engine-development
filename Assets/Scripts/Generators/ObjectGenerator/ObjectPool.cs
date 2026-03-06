@@ -8,46 +8,34 @@ namespace Generators.ObjectGenerator
     {
         private readonly GameObject prefab;
         private readonly Transform transformRoot;
-        private readonly Queue<GameObject> objectPool = new();
+        private readonly Queue<GameObject> objectPool;
 
-        public ObjectPool(GameObject prefab, Transform transformRoot, int initialSize)
+        public ObjectPool(GameObject prefab, Transform root, int initialSize)
         {
             this.prefab = prefab;
-            this.transformRoot = transformRoot;
+            transformRoot = root;
 
+            objectPool = new Queue<GameObject>(initialSize);
             for (int i = 0; i < initialSize; i++)
             {
-                GameObject gameObject = Object.Instantiate(prefab, transformRoot);
+                GameObject gameObject = Object.Instantiate(prefab, root);
                 gameObject.SetActive(false);
+
+                PooledObject pooled = gameObject.AddComponent<PooledObject>();
+                pooled.Prefab = prefab;
+
                 objectPool.Enqueue(gameObject);
             }
         }
 
-        public GameObject Get(Vector3 position, Quaternion rotation, Transform parent)
+        public GameObject Get(Vector3 position, Quaternion rotation)
         {
             if (objectPool.Count == 0)
-            {
-                Expand(10);
-            }
-            
-            GameObject gameObject;
-            if (objectPool.Count > 0)
-            {
-                gameObject = objectPool.Dequeue();
-                gameObject.transform.SetParent(parent);
-                gameObject.transform.SetPositionAndRotation(position, rotation);
-                gameObject.SetActive(true);
-            }
-            else
-            {
-                gameObject = Object.Instantiate(prefab, position, rotation, parent);
+                Expand(32);
 
-                PooledObject pooled = gameObject.GetComponent<PooledObject>();
-                if (!pooled)
-                    pooled = gameObject.AddComponent<PooledObject>();
-
-                pooled.Prefab = prefab;
-            }
+            GameObject gameObject = objectPool.Dequeue();
+            gameObject.transform.SetPositionAndRotation(position, rotation);
+            gameObject.SetActive(true);
 
             return gameObject;
         }
@@ -56,16 +44,9 @@ namespace Generators.ObjectGenerator
         {
             for (int i = 0; i < amount; i++)
             {
-                GameObject go = Object.Instantiate(prefab, transformRoot);
-                go.SetActive(false);
-
-                PooledObject pooled = go.GetComponent<PooledObject>();
-                if (!pooled)
-                    pooled = go.AddComponent<PooledObject>();
-
-                pooled.Prefab = prefab;
-
-                objectPool.Enqueue(go);
+                GameObject gameObject = Object.Instantiate(prefab, transformRoot);
+                gameObject.SetActive(false);
+                objectPool.Enqueue(gameObject);
             }
         }
         

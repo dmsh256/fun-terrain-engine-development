@@ -14,12 +14,16 @@ namespace Generators.ObjectGenerator
         private readonly ObjectSpawnContext objectSpawnContext;
         private readonly List<INatureObjectSpawner> spawners = new();
         private readonly List<GameObject> spawnedObjects = new();
-        private readonly List<IEnumerator<GameObject>> activeSpawnJobs = new();
         private readonly System.Random random = new(WorldContextSettings.Seed);
+        private readonly Queue<GameObject> pendingObjects = new();
+        private readonly IObjectDistributionStrategy distributionStrategy = new JitteredGridDistribution();
+        private readonly System.Action<GameObject> emitAction;
 
         public ObjectChunk(TerrainSpawnData terrainSpawnData, Transform parent, IBiomeProvider biomeProvider, 
             ObjectPoolManager objectPoolManager)
         {
+            emitAction = Emit;
+            
             objectSpawnContext = new ObjectSpawnContext(terrainSpawnData, parent, biomeProvider, objectPoolManager);
             spawners.Add(new TreeSpawner());
             spawners.Add(new RockSpawner());
@@ -29,46 +33,30 @@ namespace Generators.ObjectGenerator
         {
             foreach (INatureObjectSpawner spawner in spawners)
             {
-                IEnumerator<GameObject> spawnJobs = spawner.Spawn(objectSpawnContext, new JitteredGridDistribution(), random.Next()).GetEnumerator();
-                activeSpawnJobs.Add(spawnJobs);
+                spawner.Spawn(objectSpawnContext, distributionStrategy, random.Next(), emitAction);
             }
         }
 
-        public int SpawnStep(int maxObjectsThisFrame)
+        private void Emit(GameObject obj)
         {
-            int spawnedThisFrame = 0;
-
-            for (int i = activeSpawnJobs.Count - 1; i >= 0; i--)
+            pendingObjects.Enqueue(obj);
+        }
+        
+        public int SpawnGradually(int maxObjectsThisFrame)
+        {
+            int spawned = 0;
+            while (spawned < maxObjectsThisFrame && pendingObjects.Count > 0)
             {
-                IEnumerator<GameObject> activeSpawnJob = activeSpawnJobs[i];
-                while (spawnedThisFrame < maxObjectsThisFrame)
-                {
-                    bool hasNext = activeSpawnJob.MoveNext();
-                    if (!hasNext)
-                    {
-                        activeSpawnJob.Dispose();
-                        activeSpawnJobs.RemoveAt(i);
-                        
-                        break;
-                    }
-
-                    spawnedObjects.Add(activeSpawnJob.Current);
-                    spawnedThisFrame++;
-                }
-
-                if (spawnedThisFrame >= maxObjectsThisFrame)
-                    break;
+                GameObject gameObject = pendingObjects.Dequeue();
+                spawnedObjects.Add(gameObject);
+                spawned++;
             }
 
-            return spawnedThisFrame;
+            return spawned;
         }
         
         public void Despawn()
         {
-            foreach (IEnumerator<GameObject> job in activeSpawnJobs)
-                job.Dispose();
-
-            activeSpawnJobs.Clear();
             foreach (GameObject gameObject in spawnedObjects)
             {
                 if (!gameObject)
