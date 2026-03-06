@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: World Settings
   m_EditorClassIdentifier: Assembly-CSharp::Settings.WorldSettings
   autoUpdate: 0
-  seed: 95
+  seed: 155
   useRandomSeed: 0
   worldName: Stolen Sun
   worldSizeInChunksX: 100

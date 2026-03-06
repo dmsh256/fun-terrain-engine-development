@@ -8,7 +8,7 @@ namespace Managers.Objects
 {
     public class ObjectChunkManager
     {
-        private readonly Dictionary<Vector2, ObjectChunk> objectChunks = new();
+        private readonly Dictionary<Vector2Int, ObjectChunk> objectChunks = new();
         private readonly Transform parentTransform;
         private readonly ChunkSpawnScheduler chunkSpawnScheduler;
         private readonly ObjectPoolManager objectPoolManager;
@@ -20,7 +20,7 @@ namespace Managers.Objects
             this.objectPoolManager = objectPoolManager;
         }
 
-        public bool IsSpawned(Vector2 coord)
+        public bool IsSpawned(Vector2Int coord)
         {
             return objectChunks.ContainsKey(coord);
         }
@@ -37,24 +37,19 @@ namespace Managers.Objects
             chunkSpawnScheduler.RegisterSpawningChunk(objectChunk);
         }
         
-        public void ForEachSpawned(System.Action<Vector2> action)
+        public void ForEachSpawned(System.Action<Vector2Int> action)
         {
-            foreach (Vector2 coord in objectChunks.Keys)
+            foreach (Vector2Int coord in objectChunks.Keys)
                 action(coord);
         }
 
-        public void Remove(Vector2 coord)
+        public void Remove(Vector2Int coord)
         {
             if (!objectChunks.TryGetValue(coord, out ObjectChunk objectChunk))
                 return;
 
             objectChunk.Despawn();
             objectChunks.Remove(coord);
-        }
-        
-        public IEnumerable<Vector2> GetSpawnedCoords()
-        {
-            return objectChunks.Keys;
         }
 
         public void Clear()

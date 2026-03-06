@@ -23,11 +23,11 @@ namespace Managers.Objects
             
             if (!pools.TryGetValue(prefab, out ObjectPool objectPool))
             {
-                objectPool = new ObjectPool(prefab, rootTransform, poolInitialSize, parent);
+                objectPool = new ObjectPool(prefab, rootTransform, poolInitialSize);
                 pools.Add(prefab, objectPool);
             }
 
-            return objectPool.Get(position, rotation);
+            return objectPool.Get(position, rotation, parent);
         }
 
         public void Despawn(GameObject gameObject, GameObject prefab)

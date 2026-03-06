@@ -69,6 +69,19 @@ namespace Generators.ObjectGenerator
                 else
                     Object.Destroy(gameObject);
             }
+            
+            while (pendingObjects.Count > 0)
+            {
+                GameObject gameObject = pendingObjects.Dequeue();
+                if (!gameObject) 
+                    continue;
+
+                PooledObject pooled = gameObject.GetComponent<PooledObject>();
+                if (pooled && pooled.Prefab)
+                    objectSpawnContext.objectPoolManager.Despawn(gameObject, pooled.Prefab);
+                else
+                    Object.Destroy(gameObject);
+            }
 
             spawnedObjects.Clear();
         }

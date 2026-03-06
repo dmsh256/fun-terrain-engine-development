@@ -65,12 +65,12 @@ namespace Generators.ObjectGenerator
         
         public void OnTerrainChunkVisibilityChanged(TerrainChunk terrainChunk, bool visible)
         {
-            Vector2 terrainChunkCoordinates = terrainChunk.coordinates;
+            Vector2Int terrainChunkCoordinates = terrainChunk.coordinates;
             grassManager.SetVisibility(terrainChunkCoordinates, visible);
             if (!visible)
                 return;
 
-            Vector2Int chunkCoord = new((int)terrainChunkCoordinates.x, (int)terrainChunkCoordinates.y);
+            Vector2Int chunkCoord = new(terrainChunkCoordinates.x, terrainChunkCoordinates.y);
             if (!IsWithinRadius(chunkCoord, currentChunkCoord))
                 return;
 
@@ -82,15 +82,15 @@ namespace Generators.ObjectGenerator
 
         public void UpdateLoadedChunks(Vector2Int currentChunkCoordinates, List<TerrainChunk> visibleChunks)
         {
-            List<Vector2> toRemove = new ();
+            List<Vector2Int> toRemove = new ();
             objectManager.ForEachSpawned(coord =>
             {
-                Vector2Int chunkCoord = new ((int)coord.x, (int)coord.y);
+                Vector2Int chunkCoord = new (coord.x, coord.y);
                 if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
                     toRemove.Add(coord);
             });
 
-            foreach (Vector2 coord in toRemove)
+            foreach (Vector2Int coord in toRemove)
             {
                 grassManager.Remove(coord);
                 objectManager.Remove(coord);
@@ -98,8 +98,8 @@ namespace Generators.ObjectGenerator
 
             foreach (TerrainChunk terrainChunk in visibleChunks)
             {
-                Vector2 coord = terrainChunk.coordinates;
-                Vector2Int chunkCoord = new((int)coord.x, (int)coord.y);
+                Vector2Int coord = terrainChunk.coordinates;
+                Vector2Int chunkCoord = new(coord.x, coord.y);
                 if (!IsWithinRadius(chunkCoord, currentChunkCoordinates))
                     continue;
 
@@ -118,12 +118,12 @@ namespace Generators.ObjectGenerator
 
         private void SpawnFromScheduler(TerrainChunk terrainChunk)
         {
-            Vector2 chunkCoordinates = terrainChunk.coordinates;
+            Vector2Int chunkCoordinates = terrainChunk.coordinates;
             if (objectManager.IsSpawned(chunkCoordinates))
                 return;
 
             TerrainSpawnData terrainSpawnData = new(
-                new Vector2Int((int)chunkCoordinates.x, (int)chunkCoordinates.y),
+                new Vector2Int(chunkCoordinates.x, chunkCoordinates.y),
                 meshSettings,
                 terrainChunk.terrainContextMap.heightMap,
                 terrainChunk.terrainLayerMask);
