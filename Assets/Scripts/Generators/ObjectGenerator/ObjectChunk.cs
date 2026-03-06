@@ -3,12 +3,11 @@ using Managers.Objects;
 using WorldGeneration;
 using WorldGeneration.Biomes;
 using WorldGeneration.ObjectDistributionStrategies;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace Generators.ObjectGenerator
 {
-    using System.Collections.Generic;
-    using UnityEngine;
-
     public class ObjectChunk
     {
         private readonly ObjectSpawnContext objectSpawnContext;
@@ -16,7 +15,7 @@ namespace Generators.ObjectGenerator
         private readonly List<GameObject> spawnedObjects = new();
         private readonly System.Random random = new(WorldContextSettings.Seed);
         private readonly Queue<GameObject> pendingObjects = new();
-        private readonly IObjectDistributionStrategy distributionStrategy = new JitteredGridDistribution();
+        private readonly IObjectDistributionStrategy distributionStrategy = new PoissonDiskDistribution();
         private readonly System.Action<GameObject> emitAction;
 
         public ObjectChunk(TerrainSpawnData terrainSpawnData, Transform parent, IBiomeProvider biomeProvider, 
@@ -37,9 +36,9 @@ namespace Generators.ObjectGenerator
             }
         }
 
-        private void Emit(GameObject obj)
+        private void Emit(GameObject gameObject)
         {
-            pendingObjects.Enqueue(obj);
+            pendingObjects.Enqueue(gameObject);
         }
         
         public int SpawnGradually(int maxObjectsThisFrame)
@@ -63,7 +62,6 @@ namespace Generators.ObjectGenerator
                     continue;
 
                 PooledObject pooled = gameObject.GetComponent<PooledObject>();
-
                 if (pooled && pooled.Prefab)
                     objectSpawnContext.objectPoolManager.Despawn(gameObject, pooled.Prefab);
                 else
