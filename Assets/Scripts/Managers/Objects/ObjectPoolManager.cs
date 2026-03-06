@@ -16,14 +16,14 @@ namespace Managers.Objects
             this.rootTransform = rootTransform;
         }
 
-        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation)
+        public GameObject Spawn(GameObject prefab, Vector3 position, Quaternion rotation, Transform parent)
         {
             if (!prefab)
                 return null;
             
             if (!pools.TryGetValue(prefab, out ObjectPool objectPool))
             {
-                objectPool = new ObjectPool(prefab, rootTransform, poolInitialSize);
+                objectPool = new ObjectPool(prefab, rootTransform, poolInitialSize, parent);
                 pools.Add(prefab, objectPool);
             }
 

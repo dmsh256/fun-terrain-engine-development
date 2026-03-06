@@ -10,15 +10,16 @@ namespace Generators.ObjectGenerator
         private readonly Transform transformRoot;
         private readonly Queue<GameObject> objectPool;
 
-        public ObjectPool(GameObject prefab, Transform root, int initialSize)
+        public ObjectPool(GameObject prefab, Transform root, int initialSize, Transform parent)
         {
             this.prefab = prefab;
-            transformRoot = root;
+            transformRoot = parent;
 
             objectPool = new Queue<GameObject>(initialSize);
             for (int i = 0; i < initialSize; i++)
             {
                 GameObject gameObject = Object.Instantiate(prefab, root);
+                gameObject.transform.SetParent(transformRoot);
                 gameObject.SetActive(false);
 
                 PooledObject pooled = gameObject.AddComponent<PooledObject>();
@@ -34,6 +35,7 @@ namespace Generators.ObjectGenerator
                 Expand(32);
 
             GameObject gameObject = objectPool.Dequeue();
+            gameObject.transform.SetParent(transformRoot);
             gameObject.transform.SetPositionAndRotation(position, rotation);
             gameObject.SetActive(true);
 
@@ -45,6 +47,7 @@ namespace Generators.ObjectGenerator
             for (int i = 0; i < amount; i++)
             {
                 GameObject gameObject = Object.Instantiate(prefab, transformRoot);
+                gameObject.transform.SetParent(transformRoot);
                 gameObject.SetActive(false);
                 objectPool.Enqueue(gameObject);
             }

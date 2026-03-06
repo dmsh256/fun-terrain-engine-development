@@ -71,7 +71,7 @@ namespace Generators.Nature
                 Quaternion finalRotation = leanRotation * randomYaw;
 
                 float scale = Random.Range(spawnable.scaleMin, spawnable.scaleMax);
-                GameObject instance = objectSpawnContext.objectPoolManager.Spawn(prefab, placePosition, finalRotation);
+                GameObject instance = objectSpawnContext.objectPoolManager.Spawn(prefab, placePosition, finalRotation, objectSpawnContext.parent);
 
                 instance.transform.localScale = Vector3.one * scale;
                 
