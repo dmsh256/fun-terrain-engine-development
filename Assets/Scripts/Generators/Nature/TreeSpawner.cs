@@ -11,6 +11,7 @@ namespace Generators.Nature
     public class TreeSpawner : INatureObjectSpawner
     {
         private const float maxLeanAngle = 8f;
+        private const float maxSlopeAngle = 25f;
 
         public IEnumerable<GameObject> Spawn(ObjectSpawnContext objectSpawnContext, IObjectDistributionStrategy objectDistributionStrategy,
             int seed, float spacing = 6f)
@@ -45,7 +46,7 @@ namespace Generators.Nature
                 Vector3 terrainNormal = TerrainSampler.SampleNormalContinuous(objectSpawnContext.terrainSpawnData, localPosition); 
                 
                 float slopeAngle = Vector3.Angle(Vector3.up, terrainNormal);
-                if (slopeAngle > 25f)
+                if (slopeAngle > maxSlopeAngle)
                     continue;
 
                 Vector3 placePosition = new()
@@ -56,8 +57,8 @@ namespace Generators.Nature
                 };
 
                 GameObject prefab = spawnable.prefab;
-                prefab.name = "Tree " + " at " + worldPosition.x + " " + worldPosition.z + " " + worldPosition.y + " with normal: " + terrainNormal + ", slope " + slopeAngle;
-
+                prefab.name = "Tree at " + worldPosition.x + " " + worldPosition.z + " " + worldPosition.y + " with normal: " + terrainNormal + ", slope " + slopeAngle;
+                
                 float leanAngle = Mathf.Min(slopeAngle, maxLeanAngle);
 
                 Vector3 leanAxis = Vector3.Cross(Vector3.up, terrainNormal);
@@ -72,7 +73,7 @@ namespace Generators.Nature
                 Quaternion finalRotation = leanRotation * randomYaw;
 
                 float scale = Random.Range(spawnable.scaleMin, spawnable.scaleMax);
-                GameObject instance = Object.Instantiate(prefab, placePosition, finalRotation, objectSpawnContext.parent);
+                GameObject instance = objectSpawnContext.objectPoolManager.Spawn(prefab, placePosition, finalRotation, objectSpawnContext.parent);
 
                 instance.transform.localScale = Vector3.one * scale;
                 

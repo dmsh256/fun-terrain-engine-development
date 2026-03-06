@@ -11,11 +11,13 @@ namespace Managers.Objects
         private readonly Dictionary<Vector2, ObjectChunk> objectChunks = new();
         private readonly Transform parentTransform;
         private readonly ChunkSpawnScheduler chunkSpawnScheduler;
+        private readonly ObjectPoolManager objectPoolManager;
 
-        public ObjectChunkManager(Transform parentTransform, ChunkSpawnScheduler chunkSpawnScheduler)
+        public ObjectChunkManager(Transform parentTransform, ChunkSpawnScheduler chunkSpawnScheduler, ObjectPoolManager objectPoolManager)
         {
             this.parentTransform = parentTransform;
             this.chunkSpawnScheduler = chunkSpawnScheduler;
+            this.objectPoolManager = objectPoolManager;
         }
 
         public bool IsSpawned(Vector2 coord)
@@ -28,7 +30,7 @@ namespace Managers.Objects
             if (objectChunks.ContainsKey(terrainChunk.coordinates))
                 return;
 
-            ObjectChunk objectChunk = new (terrainSpawnData, parentTransform, biomeProvider);
+            ObjectChunk objectChunk = new (terrainSpawnData, parentTransform, biomeProvider, objectPoolManager);
             objectChunks.Add(terrainChunk.coordinates, objectChunk);
 
             objectChunk.PrepareSpawn();

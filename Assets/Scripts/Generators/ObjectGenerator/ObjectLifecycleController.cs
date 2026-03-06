@@ -36,6 +36,7 @@ namespace Generators.ObjectGenerator
         public Material grassMaterial;
         
         private Vector2Int currentChunkCoord;
+        private ObjectPoolManager objectPoolManager;
         
         public void Init(MeshSettings meshSettings, WorldSettings worldSettings)
         {
@@ -48,7 +49,7 @@ namespace Generators.ObjectGenerator
                 grassRenderer = gameObject.AddComponent<GrassIndirectRenderer>();
             
             chunkSpawnScheduler = new ChunkSpawnScheduler(maxChunkSpawnsPerFrame, maxObjectsPerFrame, SpawnFromScheduler);
-            objectManager = new ObjectChunkManager(transform, chunkSpawnScheduler);
+            objectManager = new ObjectChunkManager(transform, chunkSpawnScheduler, new ObjectPoolManager(transform));
             grassManager = new GrassChunkManager(grassRenderer, meshSettings, grassMesh, grassMaterial);
         }
         

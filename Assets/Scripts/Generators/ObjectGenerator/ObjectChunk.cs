@@ -1,4 +1,5 @@
 using Generators.Nature;
+using Managers.Objects;
 using WorldGeneration;
 using WorldGeneration.Biomes;
 using WorldGeneration.ObjectDistributionStrategies;
@@ -16,9 +17,10 @@ namespace Generators.ObjectGenerator
         private readonly List<IEnumerator<GameObject>> activeSpawnJobs = new();
         private readonly System.Random random = new(WorldContextSettings.Seed);
 
-        public ObjectChunk(TerrainSpawnData terrainSpawnData, Transform parent, IBiomeProvider biomeProvider)
+        public ObjectChunk(TerrainSpawnData terrainSpawnData, Transform parent, IBiomeProvider biomeProvider, 
+            ObjectPoolManager objectPoolManager)
         {
-            objectSpawnContext = new ObjectSpawnContext(terrainSpawnData, parent, biomeProvider);
+            objectSpawnContext = new ObjectSpawnContext(terrainSpawnData, parent, biomeProvider, objectPoolManager);
             spawners.Add(new TreeSpawner());
             spawners.Add(new RockSpawner());
         }
@@ -67,9 +69,18 @@ namespace Generators.ObjectGenerator
                 job.Dispose();
 
             activeSpawnJobs.Clear();
+            foreach (GameObject gameObject in spawnedObjects)
+            {
+                if (!gameObject)
+                    continue;
 
-            foreach (GameObject go in spawnedObjects)
-                Object.Destroy(go);
+                PooledObject pooled = gameObject.GetComponent<PooledObject>();
+
+                if (pooled && pooled.Prefab)
+                    objectSpawnContext.objectPoolManager.Despawn(gameObject, pooled.Prefab);
+                else
+                    Object.Destroy(gameObject);
+            }
 
             spawnedObjects.Clear();
         }
