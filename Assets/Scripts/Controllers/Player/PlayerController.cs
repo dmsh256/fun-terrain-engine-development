@@ -22,7 +22,7 @@ namespace Controllers.Player
         [SerializeField] private Transform cameraTransform;
         
         [SerializeField] private float walkSpeed = 4f;
-        [SerializeField] private float sprintSpeed = 7f;
+        [SerializeField] private float sprintSpeed = 9f;
         
         public float gravity = -9.81f;
         public float jumpForce = 9f;
