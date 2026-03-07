@@ -1,4 +1,4 @@
-This repo does not include any prefabs anf textures. Please, use your own.
+This repo does not include any prefabs and textures. Please, use your own.
 
 Upcoming: cliffs, rivers.
 
