@@ -146,7 +146,7 @@ namespace Controllers.Player
             animator.SetFloat(MoveY, localMove.z, 0.1f, Time.deltaTime);
             
             animator.SetBool(Grounded, controller.isGrounded);
-            animator.SetFloat(VerticalVelocity, verticalVelocity);
+            animator.SetFloat(VerticalVelocity, Mathf.Clamp(verticalVelocity, -10f, 10f));
 
             animator.SetBool(Sprint, sprinting);
         }
