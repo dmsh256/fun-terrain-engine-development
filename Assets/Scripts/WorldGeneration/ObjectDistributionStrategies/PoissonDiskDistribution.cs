@@ -26,10 +26,7 @@ namespace WorldGeneration.ObjectDistributionStrategies
             List<Vector2> active = new();
             List<Vector2> points = new();
 
-            Vector2 first = new(
-                (float)rng.NextDouble() * chunkSize,
-                (float)rng.NextDouble() * chunkSize
-            );
+            Vector2 first = new((float)rng.NextDouble() * chunkSize, (float)rng.NextDouble() * chunkSize);
 
             points.Add(first);
             active.Add(first);
@@ -41,16 +38,12 @@ namespace WorldGeneration.ObjectDistributionStrategies
                 int index = rng.Next(active.Count);
                 Vector2 center = active[index];
                 bool found = false;
-
                 for (int i = 0; i < k; i++)
                 {
                     float angle = (float)rng.NextDouble() * Mathf.PI * 2f;
                     float radius = minDistance * (1f + (float)rng.NextDouble());
 
-                    Vector2 candidate = center + new Vector2(
-                        Mathf.Cos(angle),
-                        Mathf.Sin(angle)
-                    ) * radius;
+                    Vector2 candidate = center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
 
                     if (candidate.x < 0 || candidate.y < 0 ||
                         candidate.x >= chunkSize || candidate.y >= chunkSize)

@@ -47,7 +47,7 @@ namespace Generators.Terrain
 
         private readonly Dictionary<Vector2, TerrainChunk> terrainChunkDictionary = new ();
         private readonly List<TerrainChunk> visibleTerrainChunks = new ();
-        private HashSet<Vector2> alreadyUpdatedChunkCoords = new();
+        private readonly HashSet<Vector2> alreadyUpdatedChunkCoords = new();
         
         [SerializeField]
         private LayerMask layerMask;

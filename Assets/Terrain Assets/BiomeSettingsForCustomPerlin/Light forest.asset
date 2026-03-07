@@ -70,11 +70,11 @@ MonoBehaviour:
     yOffset: 0
   - mesh: {fileID: 4579454407841743219, guid: 4980dba1a93966444a70a0cd85d202ab, type: 3}
     material: {fileID: 2100000, guid: e2fa582d73b240e46bc2e74a9fcf5643, type: 2}
-    weight: 20
+    weight: 10
     scale: 1
     yOffset: -0.1
-  - mesh: {fileID: -8302102485596996044, guid: a4ca1b73d9c584846bba71adeb330c7c, type: 3}
-    material: {fileID: 2100000, guid: f7fb888d8e5d900438f8a64a41f97ca6, type: 2}
-    weight: 50
-    scale: 1
+  - mesh: {fileID: -8120216993398560680, guid: 97b144e985146e0428ac9008c63be54a, type: 3}
+    material: {fileID: 2100000, guid: dba447ae7b6f35449930058731119a94, type: 2}
+    weight: 80
+    scale: 0.4
     yOffset: -0.1

@@ -73,3 +73,8 @@ MonoBehaviour:
     weight: 90
     scale: 1
     yOffset: 0
+  - mesh: {fileID: -4022342627301444159, guid: 97b144e985146e0428ac9008c63be54a, type: 3}
+    material: {fileID: 2100000, guid: dba447ae7b6f35449930058731119a94, type: 2}
+    weight: 20
+    scale: 0.5
+    yOffset: 0

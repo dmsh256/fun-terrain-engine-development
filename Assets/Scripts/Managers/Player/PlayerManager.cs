@@ -6,19 +6,17 @@ namespace Managers.Player
     {
         public void PlacePlayer(Transform viewer, LayerMask layerMask) 
         {
-            Rigidbody rigidBody = viewer.GetComponentInParent<Rigidbody>();
-            Collider collider = rigidBody.GetComponent<Collider>();
-            collider.enabled = false;
-// TODO freeze the RB while loading and remove 10/10k
+            CharacterController characterController = viewer.GetComponentInParent<CharacterController>();
+            characterController.enabled = false;
+            
             Ray ray = new (viewer.position + Vector3.up * 10000f, Vector3.down);
             if (Physics.Raycast(ray, out RaycastHit hit, 15000f, layerMask))
             {
-                rigidBody.MovePosition(
-                    new Vector3(rigidBody.position.x, hit.point.y + 1.5f, rigidBody.position.z)
-                );
+                Transform player = characterController.transform;
+                player.position = new Vector3(player.position.x, hit.point.y + 1.5f, player.position.z);
             }
             
-            collider.enabled = true;
+            characterController.enabled = true;
         }
     }
 }
